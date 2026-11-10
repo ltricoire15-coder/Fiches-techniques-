@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiches TCVA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout : navigation en entonnoir — accueil (catégories) › ordres › familles › espèces › fiche technique */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --ink:#15231e; --muted:#5b6b64; --line:#d9e2dd;
+  --accent:#0d6b5e; --accent-soft:#e0efeb; --dom:#1f6f3a; --dom-bg:#e3f2e7; --nd:#9a4b12; --nd-bg:#fbeadb;
+  --c-poi:#1f6fa8; --c-amp:#5b8a1e; --c-rep:#a0611a; --c-ois:#b0345a; --c-mam:#6b4fa3; --c-inv:#4d6470;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1714; --surface:#16211d; --ink:#e4ece8; --muted:#97a8a0; --line:#2a3833;
+  --accent:#4fc2ad; --accent-soft:#1c3530; --dom:#7fd39a; --dom-bg:#1b3324; --nd:#f0a56a; --nd-bg:#3a2617;
+  --c-poi:#6fb3e6; --c-amp:#a3cf62; --c-rep:#e3a15a; --c-ois:#ec7f9f; --c-mam:#b29ae6; --c-inv:#9db3be; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1714; --surface:#16211d; --ink:#e4ece8; --muted:#97a8a0; --line:#2a3833;
+  --accent:#4fc2ad; --accent-soft:#1c3530; --dom:#7fd39a; --dom-bg:#1b3324; --nd:#f0a56a; --nd-bg:#3a2617;
+  --c-poi:#6fb3e6; --c-amp:#a3cf62; --c-rep:#e3a15a; --c-ois:#ec7f9f; --c-mam:#b29ae6; --c-inv:#9db3be; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
+.brand{font-family:var(--f-display);font-weight:700;font-size:1.05rem;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px}
+.brand span{color:var(--muted);font-weight:500}
+input[type=search]{font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);min-width:0;width:100%}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 12px}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,a:focus-visible,dd:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.crumbs{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:.86rem;color:var(--muted);margin-bottom:14px}
+.crumbs a{color:var(--accent);text-decoration:none;font-weight:500}
+.crumbs a:hover{text-decoration:underline}
+.crumbs .sep{opacity:.5}
+.level{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--cc,var(--muted));margin:0 0 4px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.8rem,4vw,2.6rem);margin:0;line-height:1.1;letter-spacing:-.015em;text-wrap:balance}
+.lead{color:var(--muted);margin:6px 0 20px;max-width:62ch}
+.hero{margin-bottom:20px}
+.search{max-width:520px;margin-bottom:22px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.tile{display:flex;flex-direction:column;gap:6px;text-align:left;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--cc,var(--accent));border-radius:10px;padding:16px 18px;transition:transform .12s,border-color .12s;min-width:0}
+.tile:hover{transform:translateY(-2px);border-color:var(--cc,var(--accent))}
+.tile h2{font-family:var(--f-display);font-size:1.35rem;margin:0;line-height:1.15}
+.tile .meta{font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.tile .ex{font-size:.86rem;color:var(--muted);line-height:1.4}
+.tile i.sci{font-size:.9rem;color:var(--muted)}
+.tiles.big .tile{padding:22px 20px;min-height:150px}
+.tiles.big .tile h2{font-size:1.7rem}
+.tile .go{margin-top:auto;font-size:.84rem;font-weight:600;color:var(--cc,var(--accent))}
+.empty{padding:16px 0;color:var(--muted)}
+article.fiche{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;min-width:0}
+.fhead{padding:20px 24px 16px;border-bottom:1px solid var(--line);border-top:6px solid var(--cc,var(--accent));display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-end}
+.fhead h1{font-size:clamp(1.5rem,3.4vw,2.2rem)}
+.ftools{display:flex;gap:8px;flex-wrap:wrap}
+.ftools button{font-size:.84rem;padding:6px 10px}
+dl{margin:0;display:grid;grid-template-columns:210px minmax(0,1fr)}
+dl>div{display:contents}
+dt,dd{padding:10px 24px;border-bottom:1px solid var(--line);margin:0}
+dt{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-top:13px}
+dd{min-width:0;overflow-wrap:anywhere}
+dl>div:last-child dt,dl>div:last-child dd{border-bottom:0}
+dd .sci{font-style:italic;font-size:1.05rem}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.85rem;font-weight:600}
+.pill.d{background:var(--dom-bg);color:var(--dom)}
+.pill.n{background:var(--nd-bg);color:var(--nd)}
+.note{display:block;color:var(--muted);font-size:.86rem;margin-top:4px}
+.rev dd .v{filter:blur(6px);cursor:pointer;user-select:none;transition:filter .15s}
+.rev dd.shown .v{filter:none;user-select:auto}
+.hint{font-size:.85rem;color:var(--muted);padding:10px 24px;background:var(--accent-soft)}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px}
+.pager a{text-decoration:none;color:var(--accent);font-weight:500;font-size:.9rem;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.pager a:hover{border-color:var(--accent)}
+footer{margin-top:28px;color:var(--muted);font-size:.84rem;max-width:75ch}
+@media (max-width:640px){
+  dl{grid-template-columns:1fr}
+  dt{border-bottom:0;padding:12px 16px 0}
+  dd{padding:2px 16px 12px}
+  .fhead{padding:18px 16px 14px}
+  .hint{padding:10px 16px}
+  .tiles.big .tile{min-height:0}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#accueil">Fiches TCVA <span id="count"></span></a>
+    <button id="revBtn" type="button" aria-pressed="false">Mode révision</button>
+  </header>
+  <main id="view" aria-live="polite"></main>
+  <footer>Les statuts juridiques suivent l'arrêté du 11 août 2006 (liste des espèces domestiques). Les espèces signalées CITES ou protégées demandent des documents particuliers (certificat intracommunautaire, déclaration ou autorisation de détention). Les paramètres et tailles sont des fourchettes usuelles : vérifiez-les avec vos cours.</footer>
+</div>
+
+<script>
+const GROUPS={
+  poi:{name:"Poissons",color:"--c-poi",emb:"Chordés (Vertébrés)",cla:"Actinoptérygiens",pl:"Paramètres de l'eau"},
+  amp:{name:"Amphibiens",color:"--c-amp",emb:"Chordés (Vertébrés)",cla:"Amphibiens",pl:"Température et humidité"},
+  rep:{name:"Reptiles",color:"--c-rep",emb:"Chordés (Vertébrés)",cla:"Reptiles",pl:"Température et humidité"},
+  ois:{name:"Oiseaux",color:"--c-ois",emb:"Chordés (Vertébrés)",cla:"Oiseaux",pl:"Température"},
+  mam:{name:"Mammifères",color:"--c-mam",emb:"Chordés (Vertébrés)",cla:"Mammifères",pl:"Température"},
+  inv:{name:"Invertébrés",color:"--c-inv",emb:"",cla:"",pl:"Température et humidité"}
+};
+const D="Domestique", N="Non domestique";
+const S=[
+/* ===== POISSONS ===== */
+{g:"poi",n:"Poisson rouge",sci:"Carassius auratus",st:D,ord:"Cypriniformes",fam:"Cyprinidés (Cyprinidae)",ori:"Chine, Asie de l'Est",bio:"Eaux douces calmes : étangs, mares, rivières lentes",reg:"Omnivore (granulés, végétaux, larves, daphnies)",rep:"Ovipare : ponte dispersée sur les plantes, pas de soins aux œufs",dim:"Visible en période de reproduction : le mâle porte des tubercules nuptiaux blancs sur les opercules et les nageoires pectorales. La femelle est plus ronde vue de dessus (ventre plein d'œufs).",comp:"Grégaire, paisible, fouille le sol",acc:"Aquarium ≥ 100 L ou bassin, filtre puissant (forte production de déchets), substrat de sable ou gravier fin arrondi, plantes robustes, pas de chauffage",par:"10 – 24 °C · pH 7 – 8 · GH 8 – 20 °dGH",vie:"10 – 20 ans (jusqu'à 30)",tai:"15 – 30 cm"},
+{g:"poi",n:"Carpe koï",sci:"Cyprinus carpio (forme koï)",st:D,ord:"Cypriniformes",fam:"Cyprinidés (Cyprinidae)",ori:"Japon (sélection) ; carpe sauvage d'Asie",bio:"Bassins, étangs, rivières lentes",reg:"Omnivore (granulés flottants adaptés à la saison, végétaux)",rep:"Ovipare : ponte sur la végétation au printemps",dim:"La femelle est plus massive et plus ronde. Le mâle est plus fin et porte des tubercules nuptiaux sur les pectorales au printemps.",comp:"Grégaire, paisible, se laisse apprivoiser",acc:"Bassin extérieur ≥ 10 m³ et ≥ 1,2 m de profondeur, filtration biologique, stérilisateur UV, pompe, aérateur, filet anti-prédateurs",par:"4 – 28 °C · pH 7 – 8,5 · GH 8 – 20 °dGH",vie:"25 – 35 ans (parfois plus)",tai:"60 – 90 cm"},
+{g:"poi",n:"Barbus de Sumatra",sci:"Puntigrus tetrazona",st:N,ord:"Cypriniformes",fam:"Cyprinidés (Cyprinidae)",ori:"Indonésie (Sumatra, Bornéo)",bio:"Ruisseaux forestiers aux eaux claires",reg:"Omnivore",rep:"Ovipare : œufs dispersés, les parents les mangent",dim:"Le mâle est plus coloré, avec museau et nageoires rouge vif. La femelle est plus ronde et plus terne.",comp:"Grégaire (groupe ≥ 8), très vif, mordille les nageoires des poissons à voiles",acc:"Aquarium ≥ 100 L, sable ou gravier, plantes en fond et espace de nage, chauffage, filtre",par:"22 – 26 °C · pH 6 – 7,5 · GH 5 – 15 °dGH",vie:"5 – 7 ans",tai:"6 – 7 cm"},
+{g:"poi",n:"Danio zébré",sci:"Danio rerio",st:N,ord:"Cypriniformes",fam:"Danionidés (Danionidae)",ori:"Inde, Bangladesh, Népal",bio:"Cours d'eau lents, rizières, mares",reg:"Omnivore",rep:"Ovipare : œufs non adhésifs dispersés sur le fond",dim:"Le mâle est fin, ses bandes sont plus contrastées avec des reflets dorés. La femelle est plus ronde au ventre blanchâtre.",comp:"Grégaire (≥ 6), très actif, paisible, sauteur",acc:"Aquarium ≥ 60 L allongé, couvercle, léger courant, plantes",par:"18 – 25 °C · pH 6,5 – 7,5 · GH 5 – 15 °dGH",vie:"3 – 5 ans",tai:"5 cm"},
+{g:"poi",n:"Rasbora arlequin",sci:"Trigonostigma heteromorpha",st:N,ord:"Cypriniformes",fam:"Danionidés (Danionidae)",ori:"Malaisie, Thaïlande, Sumatra",bio:"Ruisseaux forestiers aux eaux noires et acides",reg:"Omnivore (micro-prédateur)",rep:"Ovipare : ponte collée sous les feuilles",dim:"Chez le mâle, le triangle noir a un bord avant arrondi qui descend plus bas. La femelle est plus ronde avec un bord de triangle droit.",comp:"Grégaire (≥ 8), paisible",acc:"Aquarium ≥ 60 L très planté, sol sombre, lumière tamisée, filtre doux, chauffage",par:"23 – 28 °C · pH 5 – 7 · GH 2 – 10 °dGH",vie:"5 – 6 ans",tai:"4,5 cm"},
+{g:"poi",n:"Loche clown",sci:"Chromobotia macracanthus",st:N,ord:"Cypriniformes",fam:"Botiidés (Botiidae)",ori:"Indonésie (Sumatra, Bornéo)",bio:"Rivières de plaine",reg:"Omnivore, mange les escargots",rep:"Ovipare (reproduction en élevage par injection d'hormones uniquement)",dim:"Très peu marqué. La femelle adulte est plus ronde ; la caudale du mâle serait un peu plus courbée.",comp:"Grégaire (≥ 5), paisible, se cache le jour, épine sous l'œil (attention au filet)",acc:"Aquarium ≥ 400 L pour l'adulte, sable fin, racines et grottes, filtre puissant",par:"25 – 30 °C · pH 6 – 7,5 · GH 5 – 12 °dGH",vie:"20 ans et plus",tai:"20 – 30 cm"},
+{g:"poi",n:"Néon",sci:"Paracheirodon innesi",st:N,ord:"Characiformes",fam:"Characidés (Characidae)",ori:"Amérique du Sud (haut Amazone : Pérou, Colombie)",bio:"Ruisseaux forestiers aux eaux claires ou noires",reg:"Omnivore",rep:"Ovipare : ponte libre en eau très douce",dim:"La femelle est plus ronde, sa ligne bleue paraît courbée. Le mâle est fin, sa ligne est droite.",comp:"Grégaire (≥ 10), paisible",acc:"Aquarium ≥ 60 L planté, sol sombre, lumière douce, chauffage, filtre",par:"20 – 26 °C · pH 5 – 7 · GH 1 – 10 °dGH",vie:"5 – 8 ans",tai:"3 – 4 cm"},
+{g:"poi",n:"Cardinalis",sci:"Paracheirodon axelrodi",st:N,ord:"Characiformes",fam:"Characidés (Characidae)",ori:"Amérique du Sud (Rio Negro, Orénoque)",bio:"Eaux noires, très douces et acides",reg:"Omnivore",rep:"Ovipare : ponte libre",dim:"La femelle est plus ronde. Le mâle est plus fin.",comp:"Grégaire (≥ 10), paisible",acc:"Aquarium ≥ 80 L planté, tourbe ou feuilles de catappa, sol sombre, chauffage",par:"24 – 29 °C · pH 4,5 – 6,5 · GH 1 – 6 °dGH",vie:"5 ans",tai:"4 – 5 cm"},
+{g:"poi",n:"Guppy",sci:"Poecilia reticulata",st:D,ord:"Cyprinodontiformes",fam:"Poeciliidés (Poeciliidae)",ori:"Amérique du Sud (Venezuela, Trinidad, Guyanes)",bio:"Eaux douces à saumâtres, calmes et végétalisées",reg:"Omnivore",rep:"Ovovivipare : gestation ≈ 28 jours, 20 à 100 alevins ; la femelle stocke le sperme",dim:"Le mâle est petit, très coloré, avec une grande caudale et un gonopode (nageoire anale transformée en organe copulateur). La femelle est plus grande, terne, avec une nageoire anale en éventail et une tache de gestation.",comp:"Grégaire, paisible ; les mâles harcèlent les femelles (1 mâle pour 3 femelles)",acc:"Aquarium ≥ 54 L, plantes fines (refuge des alevins), chauffage, filtre doux, pondoir possible",par:"22 – 28 °C · pH 7 – 8 · GH 10 – 20 °dGH",vie:"2 – 3 ans",tai:"Mâle 3 cm · femelle 6 cm"},
+{g:"poi",n:"Platy",sci:"Xiphophorus maculatus",st:D,ord:"Cyprinodontiformes",fam:"Poeciliidés (Poeciliidae)",ori:"Mexique, Guatemala",bio:"Eaux lentes très végétalisées",reg:"Omnivore à tendance végétale",rep:"Ovovivipare : gestation ≈ 28 jours",dim:"Le mâle a un gonopode. La femelle a une nageoire anale en éventail et est plus grosse.",comp:"Grégaire, paisible",acc:"Aquarium ≥ 60 L, plantes, chauffage, filtre",par:"20 – 26 °C · pH 7 – 8,2 · GH 10 – 25 °dGH",vie:"3 – 4 ans",tai:"4 – 6 cm"},
+{g:"poi",n:"Xipho",sci:"Xiphophorus hellerii",st:D,ord:"Cyprinodontiformes",fam:"Poeciliidés (Poeciliidae)",ori:"Mexique au Honduras",bio:"Rivières et ruisseaux végétalisés",reg:"Omnivore",rep:"Ovovivipare : gestation ≈ 28 jours",dim:"Le mâle a une « épée » (prolongement du bas de la caudale) et un gonopode. La femelle n'a pas d'épée et a une anale en éventail.",comp:"Grégaire, mâles rivaux entre eux, sauteur",acc:"Aquarium ≥ 100 L, couvercle, plantes, chauffage, filtre",par:"22 – 28 °C · pH 7 – 8 · GH 10 – 25 °dGH",vie:"3 – 5 ans",tai:"Mâle 10 cm (sans épée) · femelle 12 cm"},
+{g:"poi",n:"Molly",sci:"Poecilia sphenops",st:D,ord:"Cyprinodontiformes",fam:"Poeciliidés (Poeciliidae)",ori:"Mexique à la Colombie",bio:"Eaux douces à saumâtres, côtes et estuaires",reg:"Omnivore à dominante végétale (algues)",rep:"Ovovivipare : gestation ≈ 30 jours",dim:"Le mâle a un gonopode. La femelle a une anale en éventail et est plus ronde.",comp:"Grégaire, paisible",acc:"Aquarium ≥ 80 L, plantes, chauffage ; ajout de sel possible",par:"24 – 28 °C · pH 7,5 – 8,5 · GH 15 – 30 °dGH",vie:"3 – 5 ans",tai:"6 – 10 cm"},
+{g:"poi",n:"Combattant",sci:"Betta splendens",st:D,ord:"Perciformes (Anabantiformes)",fam:"Osphronémidés (Osphronemidae)",ori:"Thaïlande, Cambodge",bio:"Rizières, mares et fossés peu profonds",reg:"Carnivore (insectivore)",rep:"Ovipare : le mâle construit un nid de bulles et garde œufs et larves",dim:"Le mâle a de grandes nageoires très colorées. La femelle a des nageoires courtes et un ovipositeur visible (point blanc sous le ventre).",comp:"Mâles très agressifs entre eux (1 mâle par bac). Respire l'air grâce au labyrinthe.",acc:"Aquarium ≥ 20 L, chauffage, filtre à faible courant, plantes, couvercle",par:"24 – 30 °C · pH 6 – 7,5 · GH 5 – 15 °dGH",vie:"3 – 5 ans",tai:"6 – 7 cm"},
+{g:"poi",n:"Gourami nain",sci:"Trichogaster lalius",st:N,ord:"Perciformes (Anabantiformes)",fam:"Osphronémidés (Osphronemidae)",ori:"Inde, Bangladesh",bio:"Eaux calmes envahies de végétation",reg:"Omnivore",rep:"Ovipare : nid de bulles construit par le mâle",dim:"Le mâle a des rayures rouges et bleues vives. La femelle est gris argenté.",comp:"Paisible, mâles territoriaux entre eux. Respire l'air (labyrinthe).",acc:"Aquarium ≥ 60 L, plantes flottantes, faible courant, chauffage",par:"24 – 28 °C · pH 6 – 7,5 · GH 4 – 15 °dGH",vie:"4 ans",tai:"5 – 6 cm"},
+{g:"poi",n:"Scalaire",sci:"Pterophyllum scalare",st:N,ord:"Perciformes (Cichliformes)",fam:"Cichlidés (Cichlidae)",ori:"Amérique du Sud (Amazonie)",bio:"Bras morts et eaux calmes riches en plantes",reg:"Omnivore à tendance carnivore",rep:"Ovipare : ponte sur support (feuille, vitre), soins parentaux par le couple",dim:"Difficile. Au moment de la ponte, la papille génitale du mâle est fine et pointue, celle de la femelle large et arrondie. Le mâle a souvent une bosse frontale.",comp:"Grégaire jeune, en couple adulte, territorial à la reproduction, mange les petits poissons (néons)",acc:"Aquarium haut ≥ 200 L (≥ 50 cm de haut), plantes hautes, racines, chauffage",par:"24 – 30 °C · pH 6 – 7,5 · GH 3 – 12 °dGH",vie:"10 ans",tai:"15 cm de long, 25 cm de haut"},
+{g:"poi",n:"Discus",sci:"Symphysodon aequifasciatus",st:N,ord:"Perciformes (Cichliformes)",fam:"Cichlidés (Cichlidae)",ori:"Amérique du Sud (Amazonie)",bio:"Eaux noires très douces et acides",reg:"Carnivore (vers de vase, artémias, cœur de bœuf, granulés)",rep:"Ovipare : ponte sur support ; les parents nourrissent les alevins avec leur mucus",dim:"Peu marqué. Le mâle est plus grand avec un front plus marqué ; papille génitale visible à la ponte.",comp:"Grégaire, calme, sensible au stress",acc:"Aquarium ≥ 300 L, sol nu ou sable fin, eau très propre (changements fréquents), osmoseur",par:"28 – 31 °C · pH 5 – 6,5 · GH 1 – 5 °dGH",vie:"10 – 15 ans",tai:"15 – 20 cm"},
+{g:"poi",n:"Ramirezi",sci:"Mikrogeophagus ramirezi",st:N,ord:"Perciformes (Cichliformes)",fam:"Cichlidés (Cichlidae)",ori:"Venezuela, Colombie (Llanos)",bio:"Mares et ruisseaux de savane, eaux douces",reg:"Omnivore",rep:"Ovipare : ponte sur pierre plate, soins parentaux",dim:"Le mâle est plus grand, avec les 2e et 3e rayons de la dorsale allongés. La femelle a le ventre rose à rouge.",comp:"Paisible, territorial en reproduction, vit en couple",acc:"Aquarium ≥ 60 L, sable fin, plantes, pierres plates, chauffage",par:"26 – 30 °C · pH 5 – 7 · GH 1 – 8 °dGH",vie:"2 – 4 ans",tai:"5 – 7 cm"},
+{g:"poi",n:"Cichlidé jaune du Malawi",sci:"Labidochromis caeruleus",st:N,ord:"Perciformes (Cichliformes)",fam:"Cichlidés (Cichlidae)",ori:"Afrique de l'Est (lac Malawi)",bio:"Zones rocheuses du lac",reg:"Omnivore",rep:"Ovipare incubateur buccal : la femelle garde œufs et alevins dans la bouche",dim:"Faible. Le mâle a les nageoires bordées de noir plus intense et des ocelles sur l'anale ; la femelle est plus petite.",comp:"Territorial, agressivité modérée : 1 mâle pour plusieurs femelles",acc:"Aquarium ≥ 200 L, nombreux rochers et grottes, sable corallien, filtre puissant",par:"24 – 27 °C · pH 7,5 – 8,5 · GH 10 – 20 °dGH",vie:"8 – 10 ans",tai:"8 – 10 cm"},
+{g:"poi",n:"Poisson clown",sci:"Amphiprion ocellaris",st:N,ord:"Perciformes",fam:"Pomacentridés (Pomacentridae)",ori:"Indo-Pacifique (Indonésie, Philippines, nord de l'Australie)",bio:"Récifs coralliens, vit en symbiose avec une anémone",reg:"Omnivore",rep:"Ovipare : ponte sur support près de l'anémone, gardée par le mâle. Hermaphrodite protandre (le mâle peut devenir femelle).",comp:"Territorial, vit en couple dans l'anémone",dim:"La femelle est la plus grande et dominante du groupe ; le mâle est plus petit.",acc:"Aquarium récifal ≥ 100 L, sable corallien, pierres vivantes, écumeur, pompes de brassage, éclairage adapté, sel marin, densimètre",par:"Eau de mer : 24 – 27 °C · pH 8,1 – 8,4 · densité 1,022 – 1,025 · KH 7 – 10",vie:"10 – 20 ans",tai:"8 – 11 cm"},
+{g:"poi",n:"Corydoras",sci:"Corydoras paleatus",st:N,ord:"Siluriformes",fam:"Callichthyidés (Callichthyidae)",ori:"Amérique du Sud (Brésil, Uruguay, Argentine)",bio:"Ruisseaux et rivières à fond sableux",reg:"Omnivore fouisseur (pastilles de fond)",rep:"Ovipare : accouplement en « T », ponte collée sur la vitre",dim:"La femelle est plus grande et plus ronde vue de dessus. Le mâle est plus fin avec une dorsale plus haute et pointue.",comp:"Grégaire (≥ 6), paisible ; respiration intestinale (monte prendre l'air)",acc:"Aquarium ≥ 60 L, sable fin obligatoire (protège les barbillons), cachettes",par:"18 – 26 °C · pH 6 – 7,5 · GH 2 – 12 °dGH",vie:"10 ans",tai:"6 – 7 cm"},
+{g:"poi",n:"Ancistrus",sci:"Ancistrus dolichopterus",st:N,ord:"Siluriformes",fam:"Loricariidés (Loricariidae)",ori:"Amérique du Sud (Amazonie)",bio:"Rivières, fonds de bois et de pierres",reg:"Herbivore (algues, légumes, bois)",rep:"Ovipare : ponte dans une cavité, gardée par le mâle",dim:"Le mâle porte de nombreux barbillons charnus ramifiés (odontodes) sur le museau ; la femelle n'en a pas ou peu, sur le bord seulement.",comp:"Paisible, nocturne, mâles territoriaux",acc:"Aquarium ≥ 80 L, racines (bois à râper), grottes, cachettes, filtre",par:"23 – 27 °C · pH 6 – 7,5 · GH 2 – 15 °dGH",vie:"10 – 15 ans",tai:"12 – 15 cm"},
+/* ===== AMPHIBIENS ===== */
+{g:"amp",n:"Axolotl",sci:"Ambystoma mexicanum",st:N,stn:"CITES annexe B",ord:"Urodèles (Caudata)",fam:"Ambystomatidés (Ambystomatidae)",ori:"Mexique (lac de Xochimilco)",bio:"Lacs d'altitude aux eaux fraîches",reg:"Carnivore (vers, granulés, petits poissons)",rep:"Ovipare : fécondation interne par spermatophore. Néotène (reste à l'état larvaire toute sa vie).",dim:"Le mâle adulte a le cloaque gonflé et le corps plus fin. La femelle est plus large et ronde.",comp:"Solitaire, calme ; cannibalisme chez les jeunes",acc:"Aquarium ≥ 80 L, sol nu ou sable fin (jamais de gravier, risque d'ingestion), faible courant, cachettes, pas de chauffage, ventilateur l'été",pl:"Paramètres de l'eau",par:"15 – 20 °C (max 22 °C) · pH 6,5 – 8 · GH 7 – 14 °dGH · espèce entièrement aquatique",vie:"10 – 15 ans",tai:"20 – 30 cm"},
+{g:"amp",n:"Dendrobate à tapirer",sci:"Dendrobates tinctorius",st:N,stn:"CITES annexe B",ord:"Anoures (Anura)",fam:"Dendrobatidés (Dendrobatidae)",ori:"Guyane, Suriname, nord du Brésil",bio:"Sol des forêts tropicales humides",reg:"Insectivore (drosophiles, collemboles)",rep:"Ovipare : ponte terrestre ; le mâle transporte les têtards sur son dos jusqu'à l'eau",dim:"La femelle est plus grande. Le mâle a des disques digitaux plus larges sur les doigts avant.",comp:"Diurne, territorial ; non toxique en captivité (toxines issues de l'alimentation sauvage)",acc:"Terrarium tropical ≥ 60 × 45 × 45 cm, couche de drainage, humus et feuilles mortes, plantes, brumisateur, cachettes",par:"Jour 22 – 28 °C · nuit 18 – 22 °C · humidité 80 – 100 %",vie:"10 – 15 ans",tai:"4 – 5 cm"},
+{g:"amp",n:"Rainette aux yeux rouges",sci:"Agalychnis callidryas",st:N,ord:"Anoures (Anura)",fam:"Hylidés (Hylidae)",ori:"Amérique centrale (Mexique au Panama)",bio:"Forêts tropicales humides, arboricole près de l'eau",reg:"Insectivore",rep:"Ovipare : œufs collés sur des feuilles au-dessus de l'eau",dim:"Le mâle est plus petit, avec des callosités nuptiales sur les pouces. La femelle est plus grande.",comp:"Nocturne, arboricole, paisible",acc:"Terrarium vertical ≥ 45 × 45 × 60 cm, branches, plantes, bassin d'eau, brumisation",par:"Jour 24 – 28 °C · nuit 20 °C · humidité 70 – 90 %",vie:"5 – 10 ans",tai:"Mâle 5 cm · femelle 7 cm"},
+{g:"amp",n:"Rainette de White",sci:"Ranoidea caerulea",st:N,ord:"Anoures (Anura)",fam:"Hylidés (Hylidae)",ori:"Australie, Nouvelle-Guinée",bio:"Forêts, zones humides, abords des habitations",reg:"Insectivore",rep:"Ovipare : ponte dans l'eau",dim:"Le mâle a un sac vocal (gorge grisâtre et plissée) et des callosités sur les pouces. La femelle est plus grande avec une gorge blanche.",comp:"Nocturne, calme, docile",acc:"Terrarium vertical ≥ 45 × 45 × 60 cm, branches solides, bassin d'eau, plantes",par:"Jour 24 – 30 °C · nuit 20 °C · humidité 50 – 70 %",vie:"15 – 20 ans",tai:"7 – 11 cm"},
+{g:"amp",n:"Crapaud cornu",sci:"Ceratophrys cranwelli",st:N,ord:"Anoures (Anura)",fam:"Cératophryidés (Ceratophryidae)",ori:"Argentine, Paraguay, Bolivie (Chaco)",bio:"Plaines semi-arides, s'enfouit dans le sol humide",reg:"Carnivore vorace (insectes, petits rongeurs)",rep:"Ovipare : ponte dans l'eau",dim:"Le mâle est plus petit, avec la gorge sombre et des callosités nuptiales. La femelle est plus grande.",comp:"Solitaire, chasseur à l'affût, peut mordre, cannibale",acc:"Terrarium horizontal ≥ 40 × 30 cm, épaisse couche de fibre de coco humide, bac d'eau peu profond",par:"24 – 28 °C · humidité 60 – 80 %",vie:"10 – 15 ans",tai:"Mâle 10 cm · femelle 13 cm"},
+{g:"amp",n:"Sonneur oriental",sci:"Bombina orientalis",st:N,ord:"Anoures (Anura)",fam:"Bombinatoridés (Bombinatoridae)",ori:"Corée, nord-est de la Chine, est de la Russie",bio:"Ruisseaux, mares, rizières",reg:"Insectivore",rep:"Ovipare : ponte dans l'eau",dim:"Le mâle a des callosités noires sur les avant-bras en période de reproduction. La femelle est plus grande et ronde.",comp:"Diurne, grégaire ; montre son ventre rouge en cas de menace",acc:"Aquaterrarium (moitié eau, moitié terre), mousses, pierres, couvercle",par:"18 – 24 °C (hivernage frais) · humidité 70 – 90 %",vie:"15 – 20 ans",tai:"4 – 5 cm"},
+/* ===== REPTILES ===== */
+{g:"rep",n:"Gecko léopard",sci:"Eublepharis macularius",st:N,ord:"Squamates (Squamata)",fam:"Eublépharidés (Eublepharidae)",ori:"Pakistan, Afghanistan, nord-ouest de l'Inde",bio:"Zones semi-désertiques rocailleuses",reg:"Insectivore (grillons, criquets, vers) + calcium",rep:"Ovipare : 2 œufs par ponte ; la température d'incubation détermine le sexe",dim:"Le mâle a des pores préanaux en V et deux renflements hémipéniens à la base de la queue. La femelle n'en a pas.",comp:"Nocturne, solitaire, docile ; mâles agressifs entre eux ; autotomie de la queue",acc:"Terrarium désertique ≥ 90 × 45 × 45 cm, substrat argile/sable compacté ou carrelage, 3 cachettes dont une humide, tapis chauffant avec thermostat, UVB faible",par:"Point chaud 30 – 32 °C · zone froide 24 – 26 °C · nuit 20 – 22 °C · humidité 30 – 40 %",vie:"15 – 20 ans",tai:"20 – 25 cm"},
+{g:"rep",n:"Gecko à crête",sci:"Correlophus ciliatus",st:N,ord:"Squamates (Squamata)",fam:"Diplodactylidés (Diplodactylidae)",ori:"Nouvelle-Calédonie",bio:"Forêts humides, arboricole",reg:"Omnivore (fruits, insectes, pâtée spécifique)",rep:"Ovipare : 2 œufs par ponte",dim:"Le mâle adulte a un renflement hémipénien bien visible et des pores préanaux. La femelle n'en a pas.",comp:"Nocturne, arboricole, calme ; la queue perdue ne repousse pas",acc:"Terrarium vertical ≥ 45 × 45 × 60 cm, branches, plantes, brumisation, substrat humide",par:"Jour 22 – 26 °C (max 28 °C) · nuit 18 – 22 °C · humidité 60 – 80 %",vie:"15 – 20 ans",tai:"20 cm"},
+{g:"rep",n:"Pogona (agame barbu)",sci:"Pogona vitticeps",st:N,ord:"Squamates (Squamata)",fam:"Agamidés (Agamidae)",ori:"Australie (centre et est)",bio:"Zones arides et semi-arides, bush",reg:"Omnivore (jeune surtout insectivore, adulte surtout végétaux)",rep:"Ovipare : 15 à 30 œufs",dim:"Le mâle a des renflements hémipéniens, des pores fémoraux marqués, une tête plus large et une barbe noire. La femelle a une tête plus fine.",comp:"Diurne, territorial (jamais 2 mâles ensemble), docile",acc:"Terrarium ≥ 150 × 60 × 60 cm, UVB fort (T5 10 – 12 %), spot chauffant, roches, sable/argile ou carrelage, thermostat",par:"Point chaud 40 – 45 °C · zone froide 25 – 28 °C · nuit 18 – 22 °C · humidité 30 – 40 %",vie:"10 – 15 ans",tai:"45 – 55 cm"},
+{g:"rep",n:"Dragon d'eau",sci:"Physignathus cocincinus",st:N,ord:"Squamates (Squamata)",fam:"Agamidés (Agamidae)",ori:"Asie du Sud-Est (Thaïlande, Vietnam, sud de la Chine)",bio:"Forêts humides au bord des cours d'eau",reg:"Insectivore à omnivore",rep:"Ovipare",dim:"Le mâle a une crête plus haute, une tête plus large et des joues roses ou jaunes. La femelle est plus petite.",comp:"Diurne, arboricole, nerveux, se jette à l'eau s'il a peur",acc:"Terrarium ≥ 150 × 60 × 150 cm, grand bassin, branches, UVB, spot chauffant",par:"Jour 26 – 30 °C (spot 32 – 35 °C) · nuit 22 °C · humidité 70 – 80 %",vie:"10 – 15 ans",tai:"60 – 90 cm (dont 2/3 de queue)"},
+{g:"rep",n:"Iguane vert",sci:"Iguana iguana",st:N,stn:"CITES annexe B",ord:"Squamates (Squamata)",fam:"Iguanidés (Iguanidae)",ori:"Amérique centrale et du Sud",bio:"Forêts tropicales près de l'eau, arboricole",reg:"Herbivore strict (feuilles, légumes, fleurs)",rep:"Ovipare : 20 à 70 œufs",dim:"Le mâle a un fanon et une crête plus grands, de grosses bajoues et des pores fémoraux très marqués. La femelle est plus petite.",comp:"Diurne, arboricole ; le mâle peut devenir agressif en période de reproduction",acc:"Terrarium ≥ 200 × 100 × 200 cm, UVB, spot, branches, bassin",par:"Jour 28 – 32 °C (spot 35 – 38 °C) · nuit 22 – 24 °C · humidité 70 – 80 %",vie:"15 – 20 ans",tai:"1,5 – 2 m (avec la queue)"},
+{g:"rep",n:"Caméléon casqué",sci:"Chamaeleo calyptratus",st:N,stn:"CITES annexe B",ord:"Squamates (Squamata)",fam:"Caméléonidés (Chamaeleonidae)",ori:"Yémen, Arabie saoudite",bio:"Montagnes semi-arides avec végétation",reg:"Insectivore",rep:"Ovipare : 30 à 80 œufs",dim:"Le mâle a un ergot (éperon) sur les pattes arrière dès la naissance et un casque plus haut. La femelle n'a pas d'ergot.",comp:"Solitaire, territorial, stressé par les manipulations",acc:"Terrarium vertical bien ventilé (grillagé) ≥ 60 × 60 × 120 cm, plantes, branches, UVB, spot, goutte-à-goutte (boit les gouttes)",par:"Jour 26 – 30 °C (spot 32 – 35 °C) · nuit 18 – 22 °C · humidité 50 – 70 %",vie:"Mâle 6 – 8 ans · femelle 4 – 5 ans",tai:"Mâle 45 – 60 cm · femelle 25 – 35 cm"},
+{g:"rep",n:"Scinque à langue bleue",sci:"Tiliqua scincoides",st:N,ord:"Squamates (Squamata)",fam:"Scincidés (Scincidae)",ori:"Australie, Nouvelle-Guinée",bio:"Savanes et forêts ouvertes",reg:"Omnivore",rep:"Vivipare : 5 à 20 petits",dim:"Peu marqué. Le mâle a une tête plus large et une base de queue plus épaisse ; la femelle a un corps plus long.",comp:"Diurne, terrestre, calme, solitaire",acc:"Terrarium ≥ 120 × 60 × 60 cm, copeaux ou terre, cachettes, UVB, spot",par:"Point chaud 35 – 38 °C · zone froide 24 – 28 °C · nuit 20 – 22 °C · humidité 40 – 60 %",vie:"15 – 20 ans",tai:"45 – 60 cm"},
+{g:"rep",n:"Python royal",sci:"Python regius",st:N,stn:"CITES annexe B",ord:"Squamates (Squamata)",fam:"Pythonidés (Pythonidae)",ori:"Afrique de l'Ouest et centrale",bio:"Savanes, prairies, terriers",reg:"Carnivore (rongeurs)",rep:"Ovipare : 4 à 10 œufs, la femelle s'enroule autour",dim:"Le mâle a des éperons cloacaux plus longs et une queue plus longue et épaisse à la base. La femelle est plus grande. Sexage par sondage.",comp:"Nocturne, calme ; se met en boule quand il a peur",acc:"Terrarium ≥ 120 × 60 × 60 cm, 2 cachettes (chaude et froide), bac d'eau, tapis chauffant avec thermostat",par:"Point chaud 30 – 32 °C · zone froide 26 °C · nuit 24 °C · humidité 50 – 70 %",vie:"25 – 30 ans",tai:"1,2 – 1,5 m"},
+{g:"rep",n:"Boa constricteur",sci:"Boa imperator",st:N,stn:"CITES annexe B",ord:"Squamates (Squamata)",fam:"Boïdés (Boidae)",ori:"Amérique centrale, nord de l'Amérique du Sud",bio:"Forêts et savanes",reg:"Carnivore (rongeurs, lapins)",rep:"Vivipare (souvent dit ovovivipare) : 10 à 60 petits",dim:"Le mâle a des éperons plus longs et une queue plus longue. La femelle est nettement plus grande et massive.",comp:"Nocturne, calme, puissant",acc:"Terrarium ≥ 200 × 80 × 80 cm pour l'adulte, branches, cachettes, bac d'eau, chauffage avec thermostat",par:"Point chaud 30 – 32 °C · zone froide 26 °C · nuit 24 °C · humidité 60 – 70 %",vie:"20 – 30 ans",tai:"1,8 – 3 m"},
+{g:"rep",n:"Serpent des blés",sci:"Pantherophis guttatus",st:N,ord:"Squamates (Squamata)",fam:"Colubridés (Colubridae)",ori:"Sud-est des États-Unis",bio:"Forêts, champs, fermes",reg:"Carnivore (rongeurs)",rep:"Ovipare : 10 à 30 œufs",dim:"Le mâle a une queue plus longue et plus épaisse à la base (hémipénis). Sexage par sondage.",comp:"Crépusculaire, docile ; s'échappe facilement (couvercle verrouillé)",acc:"Terrarium ≥ 100 × 50 × 50 cm, copeaux de hêtre ou aspen, cachettes chaude et froide, bac d'eau, tapis chauffant avec thermostat",par:"Point chaud 28 – 30 °C · zone froide 22 – 24 °C · nuit 20 °C · humidité 40 – 60 %",vie:"15 – 20 ans",tai:"1,2 – 1,5 m"},
+{g:"rep",n:"Serpent roi de Californie",sci:"Lampropeltis californiae",st:N,ord:"Squamates (Squamata)",fam:"Colubridés (Colubridae)",ori:"Sud-ouest des États-Unis, nord du Mexique",bio:"Milieux variés : déserts, prairies, forêts",reg:"Carnivore, ophiophage (mange aussi d'autres serpents)",rep:"Ovipare",dim:"Le mâle a une queue plus longue et épaisse à la base. Sexage par sondage.",comp:"Solitaire obligatoire (cannibale), actif",acc:"Terrarium ≥ 100 × 50 × 50 cm, copeaux, cachettes, bac d'eau, chauffage avec thermostat",par:"Point chaud 28 – 30 °C · zone froide 22 – 24 °C · humidité 40 – 50 %",vie:"15 – 20 ans",tai:"0,9 – 1,2 m"},
+{g:"rep",n:"Tortue d'Hermann",sci:"Testudo hermanni",st:N,stn:"Espèce protégée, CITES annexe A : certificat intracommunautaire et identification par puce obligatoires",ord:"Chéloniens (Testudines)",fam:"Testudinidés (Testudinidae)",ori:"Sud de l'Europe (France : Var, Corse)",bio:"Maquis, garrigue",reg:"Herbivore (plantes sauvages ; très peu de fruits)",rep:"Ovipare : 2 à 6 œufs enterrés",dim:"Le mâle a une queue longue et épaisse terminée par un ergot corné, un plastron concave et le cloaque éloigné du corps. La femelle a une queue courte et un plastron plat.",comp:"Diurne, solitaire, hiberne ; mâles insistants",acc:"Enclos extérieur clos ≥ 10 m² (idéal) ou terrarium ouvert ≥ 120 × 60 cm, UVB, spot, abri, gamelle d'eau",par:"Spot 32 – 35 °C · ambiance 20 – 28 °C · hibernation 4 – 6 °C · humidité 50 – 70 %",vie:"50 – 80 ans et plus",tai:"15 – 20 cm"},
+{g:"rep",n:"Tortue sillonnée",sci:"Centrochelys sulcata",st:N,stn:"CITES annexe B",ord:"Chéloniens (Testudines)",fam:"Testudinidés (Testudinidae)",ori:"Afrique (Sahel)",bio:"Savanes sèches, steppes",reg:"Herbivore (foin, herbes, végétaux riches en fibres)",rep:"Ovipare : 15 à 30 œufs",dim:"Le mâle est plus grand, avec une queue longue, un plastron concave et des écailles gulaires plus saillantes.",comp:"Diurne, fouisseuse ; les mâles se battent",acc:"Très grand enclos extérieur (≥ 30 m² pour un adulte) avec abri chauffé, UVB",par:"Spot 35 – 40 °C · ambiance 26 – 30 °C · nuit ≥ 20 °C (pas d'hibernation) · humidité 40 – 60 %",vie:"70 ans et plus",tai:"60 – 80 cm, 50 – 100 kg"},
+{g:"rep",n:"Tortue musquée",sci:"Sternotherus odoratus",st:N,ord:"Chéloniens (Testudines)",fam:"Kinosternidés (Kinosternidae)",ori:"Est des États-Unis, sud-est du Canada",bio:"Eaux calmes à fond vaseux",reg:"Carnivore (escargots, insectes, poissons)",rep:"Ovipare : ponte à terre",dim:"Le mâle a une queue longue et épaisse avec un ongle au bout, et des écailles rugueuses à l'intérieur des pattes arrière. La femelle a une queue courte.",comp:"Aquatique, vit au fond, peut mordre ; dégage une odeur musquée",acc:"Aquaterrarium ≥ 100 L, eau peu profonde, zone émergée, UVB, spot, filtre puissant",par:"Eau 22 – 26 °C · spot 30 °C",vie:"30 – 50 ans",tai:"8 – 13 cm"},
+/* ===== OISEAUX ===== */
+{g:"ois",n:"Canari",sci:"Serinus canaria",st:D,ord:"Passériformes",fam:"Fringillidés (Fringillidae)",ori:"Îles Canaries, Madère, Açores",bio:"Forêts claires, buissons",reg:"Granivore (alpiste, navette), verdure, pâtée aux œufs",rep:"Ovipare : 3 à 5 œufs, incubation 13 jours, nid en coupe",dim:"Seul le mâle chante. En reproduction, le cloaque du mâle forme une protubérance cylindrique ; celui de la femelle est plat.",comp:"Grégaire, paisible ; mâles parfois querelleurs",acc:"Cage longue ≥ 60 cm ou volière, perchoirs en bois de diamètres variés, mangeoire, abreuvoir, baignoire, os de seiche, grit",par:"15 – 25 °C",vie:"10 – 12 ans",tai:"12 – 14 cm"},
+{g:"ois",n:"Diamant mandarin",sci:"Taeniopygia guttata",st:D,ord:"Passériformes",fam:"Estrildidés (Estrildidae)",ori:"Australie",bio:"Savanes arides",reg:"Granivore (millets)",rep:"Ovipare : 4 à 6 œufs, incubation 14 jours, nid fermé",dim:"Le mâle a les joues orange, les flancs marron à points blancs et la poitrine zébrée. La femelle est grise avec une « larme » noire sous l'œil.",comp:"Grégaire, très actif",acc:"Cage ou volière ≥ 80 cm, nid fermé ou panier, perchoirs, mangeoire, abreuvoir, baignoire",par:"18 – 25 °C",vie:"5 – 8 ans",tai:"10 – 11 cm"},
+{g:"ois",n:"Diamant de Gould",sci:"Chloebia gouldiae",st:D,ord:"Passériformes",fam:"Estrildidés (Estrildidae)",ori:"Nord de l'Australie",bio:"Savanes boisées",reg:"Granivore",rep:"Ovipare : 4 à 6 œufs, nid fermé",dim:"Le mâle a des couleurs plus vives, une poitrine violet intense et des plumes centrales de queue plus longues. La femelle est plus terne.",comp:"Grégaire, paisible, sensible au froid",acc:"Volière, nid fermé, perchoirs, baignoire",par:"20 – 28 °C (jamais < 18 °C)",vie:"5 – 8 ans",tai:"13 – 14 cm"},
+{g:"ois",n:"Moineau du Japon",sci:"Lonchura striata domestica",st:D,ord:"Passériformes",fam:"Estrildidés (Estrildidae)",ori:"Forme domestique créée en Chine et au Japon (souche d'Asie du Sud-Est)",bio:"Uniquement en captivité",reg:"Granivore (millets)",rep:"Ovipare ; excellent couveur, utilisé comme nourricier",dim:"Aucun dimorphisme visible : seul le mâle chante et danse.",comp:"Grégaire, très paisible",acc:"Cage ou volière, nid fermé, perchoirs",par:"18 – 25 °C",vie:"7 – 10 ans",tai:"11 – 12 cm"},
+{g:"ois",n:"Padda",sci:"Padda oryzivora",st:D,ord:"Passériformes",fam:"Estrildidés (Estrildidae)",ori:"Indonésie (Java, Bali)",bio:"Rizières, prairies",reg:"Granivore (riz paddy, millets)",rep:"Ovipare : nid fermé",dim:"Faible : seul le mâle chante ; son bec et son cercle oculaire sont plus épais et plus rouges en reproduction.",comp:"Grégaire, paisible",acc:"Volière, nid fermé, perchoirs, baignoire",par:"18 – 25 °C",vie:"7 – 10 ans",tai:"14 – 16 cm"},
+{g:"ois",n:"Perruche ondulée",sci:"Melopsittacus undulatus",st:D,ord:"Psittaciformes",fam:"Psittaculidés (Psittaculidae)",ori:"Australie",bio:"Savanes, prairies arides",reg:"Granivore (millets, alpiste), légumes",rep:"Ovipare cavernicole : 4 à 6 œufs dans un nichoir",dim:"Le mâle a la cire (au-dessus du bec) bleue. La femelle a la cire beige à brune (marron foncé en reproduction).",comp:"Très grégaire et sociable, bavarde ; ne jamais la garder seule",acc:"Cage ≥ 80 × 40 × 50 cm, perchoirs en bois naturel, jouets, os de seiche, pierre à minéraux, baignoire",par:"15 – 25 °C",vie:"8 – 12 ans",tai:"18 cm"},
+{g:"ois",n:"Inséparable rosegorge",sci:"Agapornis roseicollis",st:D,ord:"Psittaciformes",fam:"Psittaculidés (Psittaculidae)",ori:"Sud-ouest de l'Afrique (Namibie, Angola)",bio:"Régions arides boisées",reg:"Granivore, fruits et légumes",rep:"Ovipare cavernicole : nichoir ; la femelle transporte les matériaux dans les plumes du croupion",dim:"Aucun dimorphisme visible : sexage par test ADN (ou écartement du bassin, plus large chez la femelle).",comp:"Vit en couple, peut être agressif envers les autres espèces",acc:"Cage ≥ 80 cm, nichoir, perchoirs, jouets, baignoire",par:"18 – 25 °C",vie:"10 – 15 ans",tai:"15 – 17 cm"},
+{g:"ois",n:"Calopsitte",sci:"Nymphicus hollandicus",st:D,ord:"Psittaciformes",fam:"Cacatuidés (Cacatuidae)",ori:"Australie",bio:"Zones arides et semi-arides",reg:"Granivore, légumes",rep:"Ovipare cavernicole : nichoir",dim:"Chez la forme sauvage, le mâle a la face jaune vif et le dessous des ailes et de la queue unis. La femelle a la face grise et des rayures jaunes sous la queue. Le mâle siffle et imite.",comp:"Sociable, douce, porte une huppe",acc:"Cage ≥ 100 × 60 × 80 cm, perchoirs, jouets, os de seiche, baignoire",par:"15 – 25 °C",vie:"15 – 20 ans",tai:"30 – 33 cm"},
+{g:"ois",n:"Perroquet gris du Gabon",sci:"Psittacus erithacus",st:N,stn:"CITES annexe A : certificat intracommunautaire et bague ou puce obligatoires",ord:"Psittaciformes",fam:"Psittacidés (Psittacidae)",ori:"Afrique centrale et de l'Ouest",bio:"Forêts tropicales humides",reg:"Granivore-frugivore (granulés extrudés, fruits, légumes)",rep:"Ovipare cavernicole",dim:"Pas de dimorphisme fiable : sexage par test ADN.",comp:"Très intelligent, sociable, imitateur ; s'arrache les plumes (picage) s'il s'ennuie",acc:"Grande cage ou volière ≥ 120 × 80 × 120 cm, perchoirs naturels, jouets à détruire, sorties quotidiennes",par:"18 – 25 °C",vie:"40 – 60 ans",tai:"33 cm"},
+{g:"ois",n:"Caille de Chine",sci:"Synoicus chinensis",st:N,ord:"Galliformes",fam:"Phasianidés (Phasianidae)",ori:"Asie du Sud-Est, Australie",bio:"Prairies humides, herbes hautes",reg:"Granivore-insectivore",rep:"Ovipare : 5 à 10 œufs au sol ; poussins nidifuges",dim:"Le mâle a la gorge noire et blanche, la poitrine bleu ardoise et le ventre roux. La femelle est brune tachetée.",comp:"Terrestre, vit en couple ; s'envole à la verticale quand elle a peur (plafond souple)",acc:"Sol de volière, litière, herbes, abri",par:"18 – 25 °C",vie:"5 – 8 ans",tai:"12 – 14 cm"},
+{g:"ois",n:"Colombe diamant",sci:"Geopelia cuneata",st:N,ord:"Columbiformes",fam:"Columbidés (Columbidae)",ori:"Australie",bio:"Zones arides boisées",reg:"Granivore",rep:"Ovipare : 2 œufs ; les petits sont nourris au lait de jabot",dim:"Le mâle a un cercle autour de l'œil plus large et plus rouge ; il roucoule et parade.",comp:"Grégaire, paisible",acc:"Volière, plateau de nid, perchoirs, baignoire",par:"15 – 25 °C",vie:"10 – 12 ans",tai:"19 – 21 cm"},
+/* ===== MAMMIFÈRES ===== */
+{g:"mam",n:"Lapin",sci:"Oryctolagus cuniculus",st:D,ord:"Lagomorphes",fam:"Léporidés (Leporidae)",ori:"Péninsule Ibérique (sud-ouest de l'Europe)",bio:"Prairies, terriers",reg:"Herbivore strict (foin à volonté, verdure, granulés) ; cæcotrophie ; dents à croissance continue",rep:"Vivipare : gestation 31 jours, 4 à 10 lapereaux nidicoles",dim:"Le mâle a des testicules visibles (dès 3 mois) et un orifice génital rond. La femelle a une fente génitale en V et souvent un fanon.",comp:"Grégaire, crépusculaire, territorial ; mâles agressifs entre eux (stérilisation conseillée)",acc:"Enclos ≥ 2 m² + sorties, litière végétale, râtelier à foin, abreuvoir, cachette, objets à ronger",par:"15 – 22 °C (supporte mal plus de 28 °C)",vie:"8 – 12 ans",tai:"Lapin nain 1 – 1,5 kg ; grandes races jusqu'à 8 kg"},
+{g:"mam",n:"Cobaye",sci:"Cavia porcellus",st:D,ord:"Rongeurs (Rodentia)",fam:"Caviidés (Caviidae)",ori:"Andes (Pérou, Bolivie)",bio:"Prairies d'altitude",reg:"Herbivore strict ; besoin de vitamine C (ne la fabrique pas)",rep:"Vivipare : gestation 59 – 72 jours, 2 à 4 petits nidifuges",dim:"En pressant de chaque côté des organes génitaux : forme en « i » chez le mâle (le pénis sort), en « Y » chez la femelle.",comp:"Grégaire, craintif, paisible, vocalise beaucoup",acc:"Cage ≥ 120 × 60 cm, litière, râtelier à foin, maisonnette, abreuvoir",par:"18 – 24 °C",vie:"5 – 8 ans",tai:"20 – 30 cm, 0,7 – 1,2 kg"},
+{g:"mam",n:"Chinchilla",sci:"Chinchilla lanigera",st:D,ord:"Rongeurs (Rodentia)",fam:"Chinchillidés (Chinchillidae)",ori:"Andes du Chili",bio:"Montagnes rocheuses arides",reg:"Herbivore (foin, granulés spécifiques)",rep:"Vivipare : gestation 111 jours, 1 à 3 petits nidifuges",dim:"Le mâle a une grande distance entre l'anus et l'organe génital. Chez la femelle, les orifices sont collés.",comp:"Grégaire, crépusculaire, très actif, sauteur",acc:"Cage haute à étages ≥ 100 × 60 × 120 cm, bain de sable (terre à chinchilla), planches, pierre à ronger",par:"15 – 20 °C (craint la chaleur au-delà de 25 °C)",vie:"15 – 20 ans",tai:"25 – 35 cm + 15 cm de queue, 0,5 – 0,8 kg"},
+{g:"mam",n:"Octodon (dègue)",sci:"Octodon degus",st:N,ord:"Rongeurs (Rodentia)",fam:"Octodontidés (Octodontidae)",ori:"Chili",bio:"Zones semi-arides, broussailles",reg:"Herbivore ; aucun sucre (sensible au diabète)",rep:"Vivipare : gestation 90 jours, 4 à 6 petits nidifuges",dim:"Distance anogénitale plus grande chez le mâle.",comp:"Grégaire, diurne, actif ; la peau de la queue se détache si on la tire",acc:"Cage haute entièrement grillagée (ronge le plastique), bain de sable, roue pleine, étages",par:"18 – 24 °C",vie:"6 – 8 ans",tai:"25 – 30 cm avec la queue"},
+{g:"mam",n:"Hamster doré",sci:"Mesocricetus auratus",st:D,ord:"Rongeurs (Rodentia)",fam:"Cricétidés (Cricetidae)",ori:"Syrie",bio:"Steppes, terriers",reg:"Omnivore (graines + protéines animales)",rep:"Vivipare : gestation 16 jours, 6 à 12 petits nidicoles",dim:"Le mâle a une grande distance anogénitale et des testicules proéminents (arrière en pointe). La femelle a des orifices rapprochés (arrière arrondi).",comp:"Solitaire obligatoire, très territorial, nocturne ; abajoues",acc:"Cage ≥ 100 × 50 cm de surface, litière épaisse (fouisseur), roue ≥ 28 cm, nid, cachettes",par:"18 – 24 °C (en dessous de 10 °C, risque d'hibernation)",vie:"2 – 3 ans",tai:"15 – 18 cm, 100 – 200 g"},
+{g:"mam",n:"Hamster de Roborovski",sci:"Phodopus roborovskii",st:N,ord:"Rongeurs (Rodentia)",fam:"Cricétidés (Cricetidae)",ori:"Mongolie, nord de la Chine, Kazakhstan",bio:"Déserts sableux",reg:"Omnivore à dominante granivore",rep:"Vivipare : gestation 20 – 22 jours",dim:"Distance anogénitale plus grande chez le mâle ; il a une glande odorante sur le ventre.",comp:"Peut vivre en groupe formé jeune, très rapide, peu manipulable, nocturne",acc:"Cage ≥ 80 × 40 cm, litière épaisse, bain de sable, roue ≥ 20 cm",par:"18 – 24 °C",vie:"2 – 3 ans",tai:"4 – 5 cm, 20 – 30 g"},
+{g:"mam",n:"Gerbille de Mongolie",sci:"Meriones unguiculatus",st:D,ord:"Rongeurs (Rodentia)",fam:"Muridés (Muridae)",ori:"Mongolie, nord de la Chine",bio:"Steppes arides",reg:"Omnivore à dominante granivore",rep:"Vivipare : gestation 24 – 26 jours, 4 à 6 petits",dim:"Le mâle a un scrotum visible et une grande distance anogénitale.",comp:"Grégaire (groupe de même sexe formé jeune), active jour et nuit, fouisseuse",acc:"Gerbilarium (aquarium + grille) ≥ 80 × 40 cm, litière de 20 cm, foin, bain de sable",par:"18 – 24 °C",vie:"3 – 4 ans",tai:"10 – 12 cm + 10 cm de queue"},
+{g:"mam",n:"Rat",sci:"Rattus norvegicus",st:D,ord:"Rongeurs (Rodentia)",fam:"Muridés (Muridae)",ori:"Asie centrale, nord de la Chine",bio:"Milieux humains, berges",reg:"Omnivore",rep:"Vivipare : gestation 21 – 23 jours, 6 à 12 petits nidicoles",dim:"Le mâle a des testicules volumineux et est plus gros. La femelle a 12 tétons visibles.",comp:"Grégaire, intelligent, sociable, nocturne",acc:"Cage haute grillagée ≥ 80 × 50 × 80 cm, étages, hamacs, litière, jouets",par:"18 – 24 °C",vie:"2 – 3 ans",tai:"20 – 25 cm + 20 cm de queue, 250 – 500 g"},
+{g:"mam",n:"Souris",sci:"Mus musculus",st:D,ord:"Rongeurs (Rodentia)",fam:"Muridés (Muridae)",ori:"Asie (nord de l'Inde)",bio:"Milieux humains, champs",reg:"Omnivore",rep:"Vivipare : gestation 19 – 21 jours, 5 à 10 petits nidicoles",dim:"Le mâle a une grande distance anogénitale et des testicules. La femelle a des tétons visibles.",comp:"Grégaire (femelles ensemble), mâles agressifs entre eux, nocturne",acc:"Cage ou aquarium grillagé, litière, roue, nid, cachettes",par:"18 – 24 °C",vie:"1,5 – 2,5 ans",tai:"7 – 10 cm + 8 cm de queue"},
+{g:"mam",n:"Furet",sci:"Mustela furo",st:D,stn:"Identification obligatoire",ord:"Carnivores (Carnivora)",fam:"Mustélidés (Mustelidae)",ori:"Forme domestique du putois (Europe)",bio:"Uniquement en captivité",reg:"Carnivore strict (croquettes spécifiques, viande)",rep:"Vivipare : gestation 42 jours, 6 à 8 petits",dim:"Le mâle est plus grand ; son pénis s'ouvre au milieu du ventre (loin de l'anus). La femelle (furette) est plus petite, sa vulve est près de l'anus ; ses chaleurs prolongées provoquent une anémie (stérilisation).",comp:"Joueur, curieux, sociable ; dort 15 à 18 h par jour",acc:"Grande cage à étages + sorties quotidiennes, hamac, bac à litière, jouets",par:"15 – 22 °C (craint plus de 30 °C)",vie:"7 – 10 ans",tai:"35 – 45 cm + 10 cm de queue, 0,6 – 2 kg"},
+{g:"mam",n:"Chien",sci:"Canis lupus familiaris",st:D,stn:"Identification obligatoire (puce ou tatouage)",ord:"Carnivores (Carnivora)",fam:"Canidés (Canidae)",ori:"Domestiqué à partir du loup gris (Eurasie)",bio:"Milieux humains",reg:"Carnivore à tendance omnivore",rep:"Vivipare : gestation 63 jours ; chaleurs 2 fois par an",dim:"Le mâle a un fourreau sous le ventre et des testicules. La femelle a une vulve sous l'anus. Le mâle est souvent plus grand.",comp:"Sociable, vit en groupe hiérarchisé ; varie selon la race",acc:"Panier, gamelles, collier ou harnais, laisse, jouets, brosse, cage de transport",par:"Selon la race (races nordiques à poil épais / races à poil ras frileuses)",vie:"10 – 15 ans",tai:"1 à 90 kg selon la race"},
+{g:"mam",n:"Chat",sci:"Felis catus",st:D,stn:"Identification obligatoire (puce ou tatouage)",ord:"Carnivores (Carnivora)",fam:"Félidés (Felidae)",ori:"Issu du chat sauvage d'Afrique (Proche-Orient)",bio:"Milieux humains",reg:"Carnivore strict (besoin de taurine)",rep:"Vivipare : gestation 63 – 65 jours, 3 à 6 chatons",dim:"Chez le mâle, l'anus et l'orifice génital sont éloignés (forme « : »). Chez la femelle, ils sont rapprochés (forme « i »). Le mâle a des joues plus larges.",comp:"Territorial, plutôt solitaire mais sociable, crépusculaire",acc:"Bac à litière, griffoir, arbre à chat, panier, gamelles, caisse de transport, jouets",par:"Température ambiante d'une maison",vie:"12 – 20 ans",tai:"3 – 7 kg"},
+{g:"mam",n:"Hérisson à ventre blanc",sci:"Atelerix albiventris",st:N,ord:"Eulipotyphles (Eulipotyphla)",fam:"Érinacéidés (Erinaceidae)",ori:"Afrique centrale et de l'Est",bio:"Savanes, steppes",reg:"Insectivore (croquettes pour chat allégées + insectes)",rep:"Vivipare : gestation 35 jours, 3 à 5 petits",dim:"Le pénis du mâle s'ouvre au milieu du ventre (loin de l'anus). Chez la femelle, les orifices sont rapprochés.",comp:"Solitaire, nocturne, se met en boule",acc:"Enclos ≥ 1 m², roue pleine ≥ 30 cm, abri, litière",par:"22 – 28 °C (en dessous de 18 °C, hibernation dangereuse)",vie:"4 – 6 ans",tai:"15 – 25 cm, 300 – 600 g"},
+/* ===== INVERTÉBRÉS ===== */
+{g:"inv",n:"Mygale à genoux rouges",sci:"Brachypelma hamorii",st:N,stn:"CITES annexe B",emb:"Arthropodes",cla:"Arachnides",ord:"Araignées (Araneae)",fam:"Théraphosidés (Theraphosidae)",ori:"Mexique (côte Pacifique)",bio:"Forêts sèches, terriers",reg:"Insectivore (grillons, blattes)",rep:"Ovipare : cocon de 400 à 800 œufs",dim:"Le mâle adulte a des crochets tibiaux sur les pattes avant, des bulbes au bout des pédipalpes, de longues pattes et un petit abdomen. Chez la femelle, on voit la spermathèque sur la mue.",comp:"Solitaire, calme ; projette des poils urticants",acc:"Terrarium horizontal ≥ 30 × 30 × 20 cm (3 fois l'envergure), 10 cm de fibre de coco ou terreau, cachette en écorce, petit abreuvoir",par:"24 – 28 °C · humidité 60 – 70 %",vie:"Femelle 20 – 30 ans · mâle 5 – 8 ans",tai:"6 – 8 cm de corps, 15 cm d'envergure"},
+{g:"inv",n:"Scorpion empereur",sci:"Pandinus imperator",st:N,stn:"CITES annexe B",emb:"Arthropodes",cla:"Arachnides",ord:"Scorpions (Scorpiones)",fam:"Scorpionidés (Scorpionidae)",ori:"Afrique de l'Ouest",bio:"Forêt tropicale et savane humide, terriers",reg:"Insectivore",rep:"Vivipare : 10 à 35 petits, portés sur le dos de la mère",dim:"Le mâle a des peignes (pectines) plus grands et un corps plus fin. La femelle est plus large.",comp:"Peut vivre en groupe, peu venimeux, se défend avec ses pinces",acc:"Terrarium ≥ 40 × 30 cm pour un couple, 10 à 15 cm de substrat humide, cachettes, coupelle d'eau",par:"24 – 28 °C · humidité 70 – 80 %",vie:"6 – 8 ans",tai:"15 – 20 cm"},
+{g:"inv",n:"Phasme bâton",sci:"Carausius morosus",st:N,emb:"Arthropodes",cla:"Insectes",ord:"Phasmes (Phasmatodea)",fam:"Lonchodidés (Lonchodidae)",ori:"Sud de l'Inde",bio:"Forêts, buissons",reg:"Phytophage (ronce, lierre, troène)",rep:"Ovipare, se reproduit par parthénogenèse (presque uniquement des femelles)",dim:"Le mâle, très rare, est plus fin, plus petit, rougeâtre en dessous. La femelle est grande et épaisse.",comp:"Nocturne, paisible, se camoufle (homochromie) et s'immobilise (catalepsie)",acc:"Phasmarium vertical aéré (hauteur ≥ 3 fois la longueur du phasme), rameaux frais dans un pot d'eau bouché, brumisateur",par:"20 – 25 °C · humidité 60 – 70 %",vie:"6 – 12 mois",tai:"7 – 10 cm"},
+{g:"inv",n:"Achatine",sci:"Achatina fulica",st:N,stn:"Ne jamais relâcher dans la nature (espèce envahissante)",emb:"Mollusques",cla:"Gastéropodes",ord:"Stylommatophores (Stylommatophora)",fam:"Achatinidés (Achatinidae)",ori:"Afrique de l'Est",bio:"Forêts humides, sol",reg:"Phytophage (végétaux, légumes) + calcium (os de seiche)",rep:"Ovipare, hermaphrodite : accouplement réciproque",dim:"Aucun : hermaphrodite (chaque individu est à la fois mâle et femelle).",comp:"Nocturne, passif, solitaire",acc:"Terrarium ≥ 40 × 30 cm avec couvercle, 10 cm de terreau ou fibre de coco, source de calcium, brumisateur",par:"22 – 28 °C · humidité 70 – 90 %",vie:"5 – 10 ans",tai:"15 – 20 cm de coquille"},
+{g:"inv",n:"Crevette red cherry",sci:"Neocaridina davidi",st:N,emb:"Arthropodes",cla:"Crustacés (Malacostracés)",ord:"Décapodes (Decapoda)",fam:"Atyidés (Atyidae)",ori:"Taïwan, Chine",bio:"Ruisseaux et mares végétalisés",reg:"Détritivore omnivore (algues, biofilm, granulés)",rep:"Ovipare : la femelle porte les œufs sous l'abdomen ; développement direct (pas de larve)",dim:"La femelle est plus grande, plus colorée, avec une « selle » jaune (ovaires) sur le dos. Le mâle est plus petit et plus transparent.",comp:"Grégaire, paisible",acc:"Aquarium ≥ 20 L, mousses, filtre avec mousse sur l'aspiration, aucun produit au cuivre",pl:"Paramètres de l'eau",par:"18 – 26 °C · pH 6,5 – 8 · GH 6 – 12 °dGH · KH 3 – 8",vie:"1 – 2 ans",tai:"2 – 3 cm"}
+];
+S.forEach((s,i)=>{s.id="e"+i;const G=GROUPS[s.g];s.emb=s.emb||G.emb;s.cla=s.cla||G.cla;s.pl=s.pl||G.pl});
+
+const FIELDS=[
+ ["Nom commun",s=>esc(s.n)],
+ ["Genre et espèce",s=>`<span class="sci">${esc(s.sci)}</span>`],
+ ["Statut juridique",s=>`<span class="pill ${s.st===D?'d':'n'}">${s.st}</span>${s.stn?`<span class="note">${esc(s.stn)}</span>`:""}`],
+ ["Embranchement et classe",s=>`${esc(s.emb)} · ${esc(s.cla)}`],
+ ["Ordre",s=>esc(s.ord)],
+ ["Famille",s=>esc(s.fam)],
+ ["Origine",s=>esc(s.ori)],
+ ["Biotope",s=>esc(s.bio)],
+ ["Régime alimentaire",s=>esc(s.reg)],
+ ["Reproduction",s=>esc(s.rep)],
+ ["Dimorphisme sexuel",s=>esc(s.dim)],
+ ["Comportement",s=>esc(s.comp)],
+ ["Accessoires",s=>esc(s.acc)],
+ [s=>s.pl,s=>esc(s.par)],
+ ["Durée de vie",s=>esc(s.vie)],
+ ["Taille adulte",s=>esc(s.tai)]
+];
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+const norm=t=>t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const plural=(n,a,b)=>n+" "+(n>1?b:a);
+
+/* Arbre : catégorie › ordre › famille › espèces (dans l'ordre des données) */
+const TREE={};
+for(const s of S){
+  const G=TREE[s.g]||(TREE[s.g]={key:s.g,orders:[]});
+  let o=G.orders.find(x=>x.name===s.ord);
+  if(!o){o={name:s.ord,key:s.g+"-"+(G.orders.length+1),fams:[]};G.orders.push(o)}
+  let f=o.fams.find(x=>x.name===s.fam);
+  if(!f){f={name:s.fam,key:o.key+"-"+(o.fams.length+1),sp:[]};o.fams.push(f)}
+  f.sp.push(s); s.o=o; s.f=f;
+}
+const countSp=o=>o.fams.reduce((n,f)=>n+f.sp.length,0);
+
+let rev=false, q="";
+const $=id=>document.getElementById(id);
+$("count").textContent="· "+S.length+" espèces";
+
+function crumbs(parts){
+  return `<nav class="crumbs" aria-label="Fil d'Ariane"><a href="#accueil">Accueil</a>${parts.map(([l,h])=>`<span class="sep">›</span>`+(h?`<a href="#${h}">${esc(l)}</a>`:`<span>${esc(l)}</span>`)).join("")}</nav>`;
+}
+function tile(href,color,title,meta,ex,go){
+  return `<a class="tile" href="#${href}" style="--cc:var(${color})"><h2>${title}</h2><div class="meta">${meta}</div>${ex?`<div class="ex">${ex}</div>`:""}<span class="go">${go} →</span></a>`;
+}
+function spTile(s){
+  return tile(s.id,GROUPS[s.g].color,esc(s.n),`<i class="sci">${esc(s.sci)}</i>`,"","Voir la fiche");
+}
+
+function viewHome(){
+  const tiles=Object.keys(GROUPS).map(k=>{
+    const G=GROUPS[k],T=TREE[k];if(!T)return"";
+    const n=T.orders.reduce((a,o)=>a+countSp(o),0);
+    return tile(k,G.color,G.name,`${plural(T.orders.length,"ordre","ordres")} · ${plural(n,"espèce","espèces")}`,T.orders.map(o=>esc(o.name.replace(/ \(.*\)/,""))).join(", "),"Voir les ordres");
+  }).join("");
+  $("view").innerHTML=`<div class="hero"><p class="level">Bac pro TCVA</p><h1>Fiches techniques animalerie</h1>
+   <p class="lead">Choisissez une catégorie, puis un ordre, puis une famille pour arriver aux fiches des espèces.</p></div>
+   <div class="search"><input type="search" id="q" placeholder="Rechercher directement une espèce (nom, genre, famille…)" aria-label="Rechercher une espèce" value="${esc(q)}"></div>
+   <div id="res"></div>`;
+  const draw=()=>{
+    const nq=norm(q);
+    if(!nq){$("res").innerHTML=`<div class="tiles big">${tiles}</div>`;return}
+    const r=S.filter(s=>norm([s.n,s.sci,s.ord,s.fam,s.cla].join(" ")).includes(nq));
+    $("res").innerHTML=r.length?`<p class="level">${plural(r.length,"résultat","résultats")}</p><div class="tiles">${r.map(spTile).join("")}</div>`:`<p class="empty">Aucune espèce ne correspond à « ${esc(q)} ».</p>`;
+  };
+  $("q").addEventListener("input",e=>{q=e.target.value.trim();draw()});
+  draw();
+}
+function viewGroup(k){
+  const G=GROUPS[k],T=TREE[k];
+  $("view").innerHTML=crumbs([[G.name]])+`<div class="hero" style="--cc:var(${G.color})"><p class="level">Catégorie</p><h1>${G.name}</h1><p class="lead">Choisissez un ordre.</p></div>
+   <div class="tiles">${T.orders.map(o=>tile(o.key,G.color,esc(o.name),`${plural(o.fams.length,"famille","familles")} · ${plural(countSp(o),"espèce","espèces")}`,o.fams.map(f=>esc(f.name.replace(/ \(.*\)/,""))).join(", "),"Voir les familles")).join("")}</div>`;
+}
+function viewOrder(k,o){
+  const G=GROUPS[k];
+  $("view").innerHTML=crumbs([[G.name,k],[o.name]])+`<div class="hero" style="--cc:var(${G.color})"><p class="level">Ordre</p><h1>${esc(o.name)}</h1><p class="lead">Choisissez une famille.</p></div>
+   <div class="tiles">${o.fams.map(f=>tile(f.key,G.color,esc(f.name),plural(f.sp.length,"espèce","espèces"),f.sp.map(s=>esc(s.n)).join(", "),"Voir les espèces")).join("")}</div>`;
+}
+function viewFam(k,o,f){
+  const G=GROUPS[k];
+  $("view").innerHTML=crumbs([[G.name,k],[o.name,o.key],[f.name]])+`<div class="hero" style="--cc:var(${G.color})"><p class="level">Famille</p><h1>${esc(f.name)}</h1><p class="lead">Choisissez une espèce pour ouvrir sa fiche technique.</p></div>
+   <div class="tiles">${f.sp.map(spTile).join("")}</div>`;
+}
+function viewSp(s){
+  const G=GROUPS[s.g],list=s.f.sp,i=list.indexOf(s),prev=list[i-1],next=list[i+1];
+  $("view").innerHTML=crumbs([[G.name,s.g],[s.ord,s.o.key],[s.fam,s.f.key],[s.n]])+
+   `<article class="fiche${rev?" rev":""}" style="--cc:var(${G.color})"><div class="fhead"><div><p class="level">Fiche technique</p><h1>${esc(s.n)}</h1></div>
+   <div class="ftools"><button type="button" id="rand">Fiche au hasard</button></div></div>
+   ${rev?`<div class="hint">Mode révision : cliquez sur une réponse floutée pour la dévoiler.</div>`:""}
+   <dl>${FIELDS.map(([l,fn],j)=>`<div><dt>${typeof l==="function"?l(s):l}</dt><dd ${rev?'tabindex="0"':""} class="${j===0?"shown":""}"><span class="v">${fn(s)}</span></dd></div>`).join("")}</dl></article>
+   <div class="pager">${prev?`<a href="#${prev.id}">← ${esc(prev.n)}</a>`:`<a href="#${s.f.key}">← Retour à la famille</a>`}${next?`<a href="#${next.id}">${esc(next.n)} →</a>`:`<a href="#${s.f.key}">Retour à la famille →</a>`}</div>`;
+  $("rand").onclick=()=>{location.hash=S[Math.floor(Math.random()*S.length)].id};
+  const fi=$("view").querySelector(".fiche");
+  fi.addEventListener("click",e=>{const dd=e.target.closest("dd");if(rev&&dd)dd.classList.add("shown")});
+  fi.addEventListener("keydown",e=>{const dd=e.target.closest("dd");if(rev&&dd&&(e.key==="Enter"||e.key===" ")){e.preventDefault();dd.classList.add("shown")}});
+}
+
+function route(){
+  const h=location.hash.slice(1);
+  let m;
+  const sp=S.find(s=>s.id===h);
+  if(sp)viewSp(sp);
+  else if(TREE[h])viewGroup(h);
+  else if((m=h.match(/^([a-z]{3})-(\d+)(?:-(\d+))?$/))&&TREE[m[1]]&&TREE[m[1]].orders[m[2]-1]){
+    const o=TREE[m[1]].orders[m[2]-1];
+    if(m[3]&&o.fams[m[3]-1])viewFam(m[1],o,o.fams[m[3]-1]); else viewOrder(m[1],o);
+  } else viewHome();
+  window.scrollTo(0,0);
+}
+$("revBtn").addEventListener("click",()=>{rev=!rev;$("revBtn").setAttribute("aria-pressed",rev);const h=location.hash.slice(1);if(S.some(s=>s.id===h))route()});
+window.addEventListener("hashchange",route);
+route();
+</script>
+</body>
+
+</html>
