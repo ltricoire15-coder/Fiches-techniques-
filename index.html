@@ -77,6 +77,10 @@ dd .sci{font-style:italic;font-size:1.05rem}
 .pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px}
 .pager a{text-decoration:none;color:var(--accent);font-weight:500;font-size:.9rem;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
 .pager a:hover{border-color:var(--accent)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.badge.ok{background:var(--dom-bg);color:var(--dom)}
+.badge.todo{background:var(--nd-bg);color:var(--nd)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;color:var(--muted);font-size:.88rem;margin:-8px 0 20px}
 footer{margin-top:28px;color:var(--muted);font-size:.84rem;max-width:75ch}
 @media (max-width:640px){
   dl{grid-template-columns:1fr}
@@ -115,7 +119,7 @@ const S=[
 {g:"poi",n:"Poisson rouge",sci:"Carassius auratus",st:D,ord:"Cypriniformes",fam:"Cyprinidés (Cyprinidae)",ori:"Chine, Asie de l'Est",bio:"Eaux douces calmes : étangs, mares, rivières lentes",reg:"Omnivore (granulés, végétaux, larves, daphnies)",rep:"Ovipare : ponte dispersée sur les plantes, pas de soins aux œufs",dim:"Visible en période de reproduction : le mâle porte des tubercules nuptiaux blancs sur les opercules et les nageoires pectorales. La femelle est plus ronde vue de dessus (ventre plein d'œufs).",comp:"Grégaire, paisible, fouille le sol",acc:"Aquarium ≥ 100 L ou bassin, filtre puissant (forte production de déchets), substrat de sable ou gravier fin arrondi, plantes robustes, pas de chauffage",par:"10 – 24 °C · pH 7 – 8 · GH 8 – 20 °dGH",vie:"10 – 20 ans (jusqu'à 30)",tai:"15 – 30 cm"},
 {g:"poi",n:"Carpe koï",sci:"Cyprinus carpio (forme koï)",st:D,ord:"Cypriniformes",fam:"Cyprinidés (Cyprinidae)",ori:"Japon (sélection) ; carpe sauvage d'Asie",bio:"Bassins, étangs, rivières lentes",reg:"Omnivore (granulés flottants adaptés à la saison, végétaux)",rep:"Ovipare : ponte sur la végétation au printemps",dim:"La femelle est plus massive et plus ronde. Le mâle est plus fin et porte des tubercules nuptiaux sur les pectorales au printemps.",comp:"Grégaire, paisible, se laisse apprivoiser",acc:"Bassin extérieur ≥ 10 m³ et ≥ 1,2 m de profondeur, filtration biologique, stérilisateur UV, pompe, aérateur, filet anti-prédateurs",par:"4 – 28 °C · pH 7 – 8,5 · GH 8 – 20 °dGH",vie:"25 – 35 ans (parfois plus)",tai:"60 – 90 cm"},
 {g:"poi",n:"Barbus de Sumatra",sci:"Puntigrus tetrazona",st:N,ord:"Cypriniformes",fam:"Cyprinidés (Cyprinidae)",ori:"Indonésie (Sumatra, Bornéo)",bio:"Ruisseaux forestiers aux eaux claires",reg:"Omnivore",rep:"Ovipare : œufs dispersés, les parents les mangent",dim:"Le mâle est plus coloré, avec museau et nageoires rouge vif. La femelle est plus ronde et plus terne.",comp:"Grégaire (groupe ≥ 8), très vif, mordille les nageoires des poissons à voiles",acc:"Aquarium ≥ 100 L, sable ou gravier, plantes en fond et espace de nage, chauffage, filtre",par:"22 – 26 °C · pH 6 – 7,5 · GH 5 – 15 °dGH",vie:"5 – 7 ans",tai:"6 – 7 cm"},
-{g:"poi",n:"Danio zébré",sci:"Danio rerio",st:N,ord:"Cypriniformes",fam:"Danionidés (Danionidae)",ori:"Inde, Bangladesh, Népal",bio:"Cours d'eau lents, rizières, mares",reg:"Omnivore",rep:"Ovipare : œufs non adhésifs dispersés sur le fond",dim:"Le mâle est fin, ses bandes sont plus contrastées avec des reflets dorés. La femelle est plus ronde au ventre blanchâtre.",comp:"Grégaire (≥ 6), très actif, paisible, sauteur",acc:"Aquarium ≥ 60 L allongé, couvercle, léger courant, plantes",par:"18 – 25 °C · pH 6,5 – 7,5 · GH 5 – 15 °dGH",vie:"3 – 5 ans",tai:"5 cm"},
+{g:"poi",n:"Danio zébré",sci:"Danio rerio",st:D,ord:"Cypriniformes",fam:"Danionidés (Danionidae)",ori:"Inde, Bangladesh, Népal",bio:"Cours d'eau lents, rizières, mares",reg:"Omnivore",rep:"Ovipare : œufs non adhésifs dispersés sur le fond",dim:"Le mâle est fin, ses bandes sont plus contrastées avec des reflets dorés. La femelle est plus ronde au ventre blanchâtre.",comp:"Grégaire (≥ 6), très actif, paisible, sauteur",acc:"Aquarium ≥ 60 L allongé, couvercle, léger courant, plantes",par:"18 – 25 °C · pH 6,5 – 7,5 · GH 5 – 15 °dGH",vie:"3 – 5 ans",tai:"5 cm"},
 {g:"poi",n:"Rasbora arlequin",sci:"Trigonostigma heteromorpha",st:N,ord:"Cypriniformes",fam:"Danionidés (Danionidae)",ori:"Malaisie, Thaïlande, Sumatra",bio:"Ruisseaux forestiers aux eaux noires et acides",reg:"Omnivore (micro-prédateur)",rep:"Ovipare : ponte collée sous les feuilles",dim:"Chez le mâle, le triangle noir a un bord avant arrondi qui descend plus bas. La femelle est plus ronde avec un bord de triangle droit.",comp:"Grégaire (≥ 8), paisible",acc:"Aquarium ≥ 60 L très planté, sol sombre, lumière tamisée, filtre doux, chauffage",par:"23 – 28 °C · pH 5 – 7 · GH 2 – 10 °dGH",vie:"5 – 6 ans",tai:"4,5 cm"},
 {g:"poi",n:"Loche clown",sci:"Chromobotia macracanthus",st:N,ord:"Cypriniformes",fam:"Botiidés (Botiidae)",ori:"Indonésie (Sumatra, Bornéo)",bio:"Rivières de plaine",reg:"Omnivore, mange les escargots",rep:"Ovipare (reproduction en élevage par injection d'hormones uniquement)",dim:"Très peu marqué. La femelle adulte est plus ronde ; la caudale du mâle serait un peu plus courbée.",comp:"Grégaire (≥ 5), paisible, se cache le jour, épine sous l'œil (attention au filet)",acc:"Aquarium ≥ 400 L pour l'adulte, sable fin, racines et grottes, filtre puissant",par:"25 – 30 °C · pH 6 – 7,5 · GH 5 – 12 °dGH",vie:"20 ans et plus",tai:"20 – 30 cm"},
 {g:"poi",n:"Néon",sci:"Paracheirodon innesi",st:N,ord:"Characiformes",fam:"Characidés (Characidae)",ori:"Amérique du Sud (haut Amazone : Pérou, Colombie)",bio:"Ruisseaux forestiers aux eaux claires ou noires",reg:"Omnivore",rep:"Ovipare : ponte libre en eau très douce",dim:"La femelle est plus ronde, sa ligne bleue paraît courbée. Le mâle est fin, sa ligne est droite.",comp:"Grégaire (≥ 10), paisible",acc:"Aquarium ≥ 60 L planté, sol sombre, lumière douce, chauffage, filtre",par:"20 – 26 °C · pH 5 – 7 · GH 1 – 10 °dGH",vie:"5 – 8 ans",tai:"3 – 4 cm"},
@@ -211,6 +215,8 @@ const FIELDS=[
 function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 const norm=t=>t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 const plural=(n,a,b)=>n+" "+(n>1?b:a);
+/* Mettre ok:true sur une espèce quand sa fiche a été vérifiée par l'enseignant(e) */
+const badge=s=>s.ok?`<span class="badge ok">✓ Vérifié</span>`:`<span class="badge todo">⚠ À vérifier</span>`;
 
 /* Arbre : catégorie › ordre › famille › espèces (dans l'ordre des données) */
 const TREE={};
@@ -235,7 +241,7 @@ function tile(href,color,title,meta,ex,go){
   return `<a class="tile" href="#${href}" style="--cc:var(${color})"><h2>${title}</h2><div class="meta">${meta}</div>${ex?`<div class="ex">${ex}</div>`:""}<span class="go">${go} →</span></a>`;
 }
 function spTile(s){
-  return tile(s.id,GROUPS[s.g].color,esc(s.n),`<i class="sci">${esc(s.sci)}</i>`,"","Voir la fiche");
+  return tile(s.id,GROUPS[s.g].color,esc(s.n),`<i class="sci">${esc(s.sci)}</i>`,badge(s),"Voir la fiche");
 }
 
 function viewHome(){
@@ -246,6 +252,7 @@ function viewHome(){
   }).join("");
   $("view").innerHTML=`<div class="hero"><p class="level">Bac pro TCVA</p><h1>Fiches techniques animalerie</h1>
    <p class="lead">Choisissez une catégorie, puis un ordre, puis une famille pour arriver aux fiches des espèces.</p></div>
+   <div class="legend"><span>${badge({ok:1})} ${S.filter(s=>s.ok).length} fiches</span><span>${badge({})} ${S.filter(s=>!s.ok).length} fiches</span></div>
    <div class="search"><input type="search" id="q" placeholder="Rechercher directement une espèce (nom, genre, famille…)" aria-label="Rechercher une espèce" value="${esc(q)}"></div>
    <div id="res"></div>`;
   const draw=()=>{
@@ -275,19 +282,21 @@ function viewFam(k,o,f){
 function viewSp(s){
   const G=GROUPS[s.g],list=s.f.sp,i=list.indexOf(s),prev=list[i-1],next=list[i+1];
   $("view").innerHTML=crumbs([[G.name,s.g],[s.ord,s.o.key],[s.fam,s.f.key],[s.n]])+
-   `<article class="fiche${rev?" rev":""}" style="--cc:var(${G.color})"><div class="fhead"><div><p class="level">Fiche technique</p><h1>${esc(s.n)}</h1></div>
+   `<article class="fiche${rev?" rev":""}" style="--cc:var(${G.color})"><div class="fhead"><div><p class="level">Fiche technique</p><h1>${esc(s.n)}</h1><div style="margin-top:8px">${badge(s)}</div></div>
    <div class="ftools"><button type="button" id="rand">Fiche au hasard</button></div></div>
    ${rev?`<div class="hint">Mode révision : cliquez sur une réponse floutée pour la dévoiler.</div>`:""}
    <dl>${FIELDS.map(([l,fn],j)=>`<div><dt>${typeof l==="function"?l(s):l}</dt><dd ${rev?'tabindex="0"':""} class="${j===0?"shown":""}"><span class="v">${fn(s)}</span></dd></div>`).join("")}</dl></article>
    <div class="pager">${prev?`<a href="#${prev.id}">← ${esc(prev.n)}</a>`:`<a href="#${s.f.key}">← Retour à la famille</a>`}${next?`<a href="#${next.id}">${esc(next.n)} →</a>`:`<a href="#${s.f.key}">Retour à la famille →</a>`}</div>`;
-  $("rand").onclick=()=>{location.hash=S[Math.floor(Math.random()*S.length)].id};
+  $("rand").onclick=()=>nav(S[Math.floor(Math.random()*S.length)].id);
   const fi=$("view").querySelector(".fiche");
   fi.addEventListener("click",e=>{const dd=e.target.closest("dd");if(rev&&dd)dd.classList.add("shown")});
   fi.addEventListener("keydown",e=>{const dd=e.target.closest("dd");if(rev&&dd&&(e.key==="Enter"||e.key===" ")){e.preventDefault();dd.classList.add("shown")}});
 }
 
+let curH=(location.hash||"").slice(1);
+function nav(h){curH=h;try{location.hash=h}catch(e){}route()}
 function route(){
-  const h=location.hash.slice(1);
+  const h=curH;
   let m;
   const sp=S.find(s=>s.id===h);
   if(sp)viewSp(sp);
@@ -298,8 +307,9 @@ function route(){
   } else viewHome();
   window.scrollTo(0,0);
 }
-$("revBtn").addEventListener("click",()=>{rev=!rev;$("revBtn").setAttribute("aria-pressed",rev);const h=location.hash.slice(1);if(S.some(s=>s.id===h))route()});
-window.addEventListener("hashchange",route);
+$("revBtn").addEventListener("click",()=>{rev=!rev;$("revBtn").setAttribute("aria-pressed",rev);if(S.some(s=>s.id===curH))route()});
+document.addEventListener("click",e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;e.preventDefault();nav(a.getAttribute("href").slice(1))});
+window.addEventListener("hashchange",()=>{const h=(location.hash||"").slice(1);if(h!==curH){curH=h;route()}});
 route();
 </script>
 </body>
