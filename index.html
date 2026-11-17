@@ -300,8 +300,13 @@ function viewFam(k,o,f){
 }
 /* Photos : chargées depuis Wikipédia à l'ouverture de la fiche (champ img = photo imposée, wp = titre Wikipédia) */
 const PH={};
+const PHOTO_BASE="https://raw.githubusercontent.com/ltricoire15-coder/Fiches-techniques-/main/photos/";
+const PHOTOS={};
+const slugSci=t=>t.replace(/\s*\(.*\)/,"").trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 async function photoFor(s){
   if(s.img)return{src:s.img,page:s.img};
+  const sl=slugSci(s.sci);
+  if(PHOTOS[sl])return{src:PHOTO_BASE+sl+".jpg",page:PHOTOS[sl]};
   if(s.id in PH)return PH[s.id];
   const sci=s.sci.replace(/\s*\(.*\)/,"").trim();
   const tries=[s.wp&&["fr",s.wp],["fr",sci],["en",sci],["fr",s.n]].filter(Boolean);
