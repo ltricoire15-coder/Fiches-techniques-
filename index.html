@@ -81,6 +81,9 @@ dd .sci{font-style:italic;font-size:1.05rem}
 .badge.ok{background:var(--dom-bg);color:var(--dom)}
 .badge.todo{background:var(--nd-bg);color:var(--nd)}
 .legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;color:var(--muted);font-size:.88rem;margin:-8px 0 20px}
+.lg{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);padding:5px 12px 5px 5px;border:1px solid var(--line);border-radius:999px;background:var(--surface);cursor:pointer}
+.lg:hover{border-color:var(--accent);color:var(--ink)}
+.lead a{color:var(--accent)}
 footer{margin-top:28px;color:var(--muted);font-size:.84rem;max-width:75ch}
 @media (max-width:640px){
   dl{grid-template-columns:1fr}
@@ -254,7 +257,7 @@ function viewHome(){
   }).join("");
   $("view").innerHTML=`<div class="hero"><p class="level">Bac pro TCVA</p><h1>Fiches techniques animalerie</h1>
    <p class="lead">Choisissez une catégorie, puis un ordre, puis une famille pour arriver aux fiches des espèces.</p></div>
-   <div class="legend"><span>${badge({ok:1})} ${S.filter(s=>s.ok).length} fiches</span><span>${badge({})} ${S.filter(s=>!s.ok).length} fiches</span></div>
+   <div class="legend"><a class="lg" href="#verifiees">${badge({ok:1})} ${plural(S.filter(s=>s.ok).length,"fiche","fiches")} →</a><a class="lg" href="#a-verifier">${badge({})} ${plural(S.filter(s=>!s.ok).length,"fiche","fiches")} →</a></div>
    <div class="search"><input type="search" id="q" placeholder="Rechercher directement une espèce (nom, genre, famille…)" aria-label="Rechercher une espèce" value="${esc(q)}"></div>
    <div id="res"></div>`;
   const draw=()=>{
@@ -284,7 +287,7 @@ function viewFam(k,o,f){
 function viewSp(s){
   const G=GROUPS[s.g],list=s.f.sp,i=list.indexOf(s),prev=list[i-1],next=list[i+1];
   $("view").innerHTML=crumbs([[G.name,s.g],[s.ord,s.o.key],[s.fam,s.f.key],[s.n]])+
-   `<article class="fiche${rev?" rev":""}" style="--cc:var(${G.color})"><div class="fhead"><div><p class="level">Fiche technique</p><h1>${esc(s.n)}</h1><div style="margin-top:8px">${badge(s)}</div></div>
+   `<article class="fiche${rev?" rev":""}" style="--cc:var(${G.color})"><div class="fhead"><div><p class="level">Fiche technique</p><h1>${esc(s.n)}</h1><a class="lg" style="margin-top:8px" href="#${s.ok?"verifiees":"a-verifier"}" title="Voir toutes ces fiches">${badge(s)} Voir la liste</a></div>
    <div class="ftools"><button type="button" id="rand">Fiche au hasard</button></div></div>
    ${rev?`<div class="hint">Mode révision : cliquez sur une réponse floutée pour la dévoiler.</div>`:""}
    <dl>${FIELDS.map(([l,fn],j)=>`<div><dt>${typeof l==="function"?l(s):l}</dt><dd ${rev?'tabindex="0"':""} class="${j===0?"shown":""}"><span class="v">${fn(s)}</span></dd></div>`).join("")}</dl></article>
@@ -297,11 +300,17 @@ function viewSp(s){
 
 let curH=(location.hash||"").slice(1);
 function nav(h){curH=h;try{location.hash=h}catch(e){}route()}
+function viewList(ok){
+  const L=S.filter(s=>!!s.ok===ok), t=ok?"Fiches vérifiées":"Fiches à vérifier";
+  const body=L.length?Object.keys(GROUPS).map(k=>{const g=L.filter(s=>s.g===k);return g.length?`<h2 class="level" style="margin:22px 0 10px;--cc:var(${GROUPS[k].color})">${GROUPS[k].name} · ${g.length}</h2><div class="tiles">${g.map(spTile).join("")}</div>`:""}).join(""):`<p class="empty">Aucune fiche pour l'instant.</p>`;
+  $("view").innerHTML=crumbs([[t]])+`<div class="hero"><div style="margin-bottom:8px">${badge({ok})}</div><h1>${t}</h1><p class="lead">${plural(L.length,"fiche","fiches")}. ${ok?"Ces fiches ont été vérifiées avec le cours.":"Ces fiches ont été rédigées automatiquement : à vérifier avec le cours."} <a href="#${ok?"a-verifier":"verifiees"}">Voir les fiches ${ok?"à vérifier":"vérifiées"}</a></p></div>`+body;
+}
 function route(){
   const h=curH;
   let m;
   const sp=S.find(s=>s.id===h);
   if(sp)viewSp(sp);
+  else if(h==="verifiees"||h==="a-verifier")viewList(h==="verifiees");
   else if(TREE[h])viewGroup(h);
   else if((m=h.match(/^([a-z]{3})-(\d+)(?:-(\d+))?$/))&&TREE[m[1]]&&TREE[m[1]].orders[m[2]-1]){
     const o=TREE[m[1]].orders[m[2]-1];
