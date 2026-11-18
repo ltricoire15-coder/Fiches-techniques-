@@ -114,7 +114,7 @@ footer{margin-top:28px;color:var(--muted);font-size:.84rem;max-width:75ch}
   <footer>Les statuts juridiques suivent l'arrêté du 11 août 2006 (liste des espèces domestiques). Les espèces signalées CITES ou protégées demandent des documents particuliers (certificat intracommunautaire, déclaration ou autorisation de détention). Les photos viennent de Wikipédia. Les paramètres et tailles sont des fourchettes usuelles : vérifiez-les avec vos cours.</footer>
 </div>
 
-<script>
+<script type="text/plain" id="app-code">
 const GROUPS={
   poi:{name:"Poissons",color:"--c-poi",emb:"Chordés (Vertébrés)",cla:"Actinoptérygiens",pl:"Paramètres de l'eau"},
   amp:{name:"Amphibiens",color:"--c-amp",emb:"Chordés (Vertébrés)",cla:"Amphibiens",pl:"Température et humidité"},
@@ -369,6 +369,8 @@ document.addEventListener("click",e=>{const a=e.target.closest('a[href^="#"]');i
 window.addEventListener("hashchange",()=>{const h=(location.hash||"").slice(1);if(h!==curH){curH=h;route()}});
 route();
 </script>
+<script>function bootApp(){if(window.__appBooted)return;var c=document.getElementById("app-code");if(!c)return;window.__appBooted=1;var s=document.createElement("script");s.text=c.textContent;document.body.appendChild(s);}bootApp();</script>
+<img alt="" hidden src="data:," onerror="if(window.bootApp)bootApp()">
 </body>
 
 </html>
