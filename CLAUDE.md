@@ -19,3 +19,11 @@ directement sur GitHub (branche `main`) : chaque push met le lien à jour.
 - Badge : `ok:true` uniquement pour les fiches envoyées par l'enseignant(e) (« ✓ Vérifié »).
   Toute fiche rédigée par Claude reste sans `ok` (« ⚠ À vérifier »).
 - Formats : températures « 22 – 28 °C », pH « pH 6 – 7,5 », dureté « GH 5 – 15 °dGH ».
+
+## Technique (ne pas casser)
+
+- Le programme est dans `<script type="text/plain" id="app-code">` et lancé par `bootApp()` en bas de page.
+  Google Apps Script écrit la page par morceaux : un `<script>` normal aussi long est coupé et
+  Safari plante (« Unexpected EOF »). Ne jamais le remettre en `<script>` classique.
+- Le cadre `#diag` affiche l'erreur à l'écran si le programme ne démarre pas.
+- Photos : `PHOTOS` associe le nom latin (slug) à [adresse de l'image, page Wikipédia].
