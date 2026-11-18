@@ -108,6 +108,9 @@ footer{margin-top:28px;color:var(--muted);font-size:.84rem;max-width:75ch}
     <button id="revBtn" type="button" aria-pressed="false">Mode révision</button>
   </header>
   <main id="view" aria-live="polite"></main>
+  <div id="diag" hidden style="margin:16px 0;padding:12px 14px;border:2px solid #c0392b;border-radius:8px;color:#c0392b;font:13px/1.4 monospace;white-space:pre-wrap"></div>
+  <script>window.addEventListener("error",function(e){var d=document.getElementById("diag");if(!d)return;d.hidden=false;d.textContent+="Erreur : "+(e.message||"?")+" (ligne "+(e.lineno||"?")+", col "+(e.colno||"?")+")\n"+navigator.userAgent+"\n";});
+  setTimeout(function(){var v=document.getElementById("view"),d=document.getElementById("diag");if(v&&d&&!v.innerHTML.trim()){d.hidden=false;d.textContent+="Le logiciel ne s'est pas lancé.\n"+navigator.userAgent+"\n";}},2500);</script>
   <footer>Les statuts juridiques suivent l'arrêté du 11 août 2006 (liste des espèces domestiques). Les espèces signalées CITES ou protégées demandent des documents particuliers (certificat intracommunautaire, déclaration ou autorisation de détention). Les photos viennent de Wikipédia. Les paramètres et tailles sont des fourchettes usuelles : vérifiez-les avec vos cours.</footer>
 </div>
 
