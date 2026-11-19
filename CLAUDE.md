@@ -18,6 +18,8 @@ directement sur GitHub (branche `main`) : chaque push met le lien à jour.
   famille restent regroupées dans le tableau.
 - Badge : `ok:true` uniquement pour les fiches envoyées par l'enseignant(e) (« ✓ Vérifié »).
   Toute fiche rédigée par Claude reste sans `ok` (« ⚠ À vérifier »).
+- Onglet : `niv:"T"` (Terminale), `niv:"P"` (Première) ou `niv:["T","P"]`, selon ce que demande
+  l'utilisateur. Sans `niv`, la fiche va dans l'onglet « Non classées » (affiché seulement s'il en reste).
 - Formats : températures « 22 – 28 °C », pH « pH 6 – 7,5 », dureté « GH 5 – 15 °dGH ».
 
 ## Technique (ne pas casser)
