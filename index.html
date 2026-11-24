@@ -83,6 +83,10 @@ dd .sci{font-style:italic;font-size:1.05rem}
 .legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;color:var(--muted);font-size:.88rem;margin:-8px 0 20px}
 .lg{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);padding:5px 12px 5px 5px;border:1px solid var(--line);border-radius:999px;background:var(--surface);cursor:pointer}
 .lg:hover{border-color:var(--accent);color:var(--ink)}
+.lg.niv{font:inherit;font-weight:600;font-size:1rem;color:var(--ink);padding:9px 18px}
+.lg.niv .n{font-weight:500;color:var(--muted);margin-left:2px;font-variant-numeric:tabular-nums}
+.lg.niv[aria-selected=true]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.lg.niv[aria-selected=true] .n{color:var(--surface);opacity:.8}
 .lead a{color:var(--accent)}
 .photo{margin:0;border-bottom:1px solid var(--line);background:var(--accent-soft);position:relative}
 .photo img{display:block;margin:0 auto;max-width:100%;max-height:360px;object-fit:contain}
@@ -199,13 +203,11 @@ const countSp=o=>o.fams.reduce((n,f)=>n+f.sp.length,0);
 
 let rev=false, q="";
 const $=id=>document.getElementById(id);
-function drawTabs(){
-  let el=$("tabs");
-  if(!el){el=document.createElement("nav");el.id="tabs";el.className="tabs";el.setAttribute("role","tablist");el.setAttribute("aria-label","Niveau");$("view").before(el);
-    el.addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)setTab(b.dataset.tab,true)})}
-  el.innerHTML=Object.keys(TABS).map(k=>{const n=S.filter(s=>inTab(s,k)).length;if(k==="N"&&!n)return"";return`<button type="button" class="tab" role="tab" data-tab="${k}" aria-selected="${k===tab}">${TABS[k]}<span class="n">${n}</span></button>`}).join("");
-  $("count").textContent="· "+TABS[tab];
+function tabsHtml(){
+  return `<div class="legend" role="tablist" aria-label="Niveau">`+Object.keys(TABS).map(k=>{const n=S.filter(s=>inTab(s,k)).length;if(k==="N"&&!n)return"";return`<button type="button" class="lg niv" role="tab" data-tab="${k}" aria-selected="${k===tab}">${TABS[k]} <span class="n">${n}</span></button>`}).join("")+`</div>`;
 }
+function drawTabs(){ $("count").textContent="· "+TABS[tab]; }
+document.addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)setTab(b.dataset.tab,true)});
 function setTab(k,home){
   if(!TABS[k])return; tab=k; try{localStorage.setItem("onglet",k)}catch(e){}
   buildTree(); drawTabs(); if(home)nav("accueil");
@@ -219,7 +221,7 @@ function tile(href,color,title,meta,ex,go){
   return `<a class="tile" href="#${href}" style="--cc:var(${color})"><h2>${title}</h2><div class="meta">${meta}</div>${ex?`<div class="ex">${ex}</div>`:""}<span class="go">${go} →</span></a>`;
 }
 function spTile(s){
-  return tile(s.id,GROUPS[s.g].color,esc(s.n),`<i class="sci">${esc(s.sci)}</i>`,badge(s),"Voir la fiche");
+  return tile(s.id,GROUPS[s.g].color,esc(s.n),`<i class="sci">${esc(s.sci)}</i>`,"","Voir la fiche");
 }
 
 function viewHome(){
@@ -230,7 +232,7 @@ function viewHome(){
   }).join("");
   $("view").innerHTML=`<div class="hero"><p class="level">Bac pro TCVA · ${TABS[tab]}</p><h1>Fiches techniques animalerie</h1>
    <p class="lead">Choisissez une catégorie, puis un ordre, puis une famille pour arriver aux fiches des espèces.</p></div>
-   <div class="legend"><a class="lg" href="#verifiees">${badge({ok:1})} ${plural(V().filter(s=>s.ok).length,"fiche","fiches")} →</a><a class="lg" href="#a-verifier">${badge({})} ${plural(V().filter(s=>!s.ok).length,"fiche","fiches")} →</a></div>
+   ${tabsHtml()}
    <div class="search"><input type="search" id="q" placeholder="Rechercher directement une espèce (nom, genre, famille…)" aria-label="Rechercher une espèce" value="${esc(q)}"></div>
    <div id="res"></div>`;
   const draw=()=>{
@@ -285,7 +287,7 @@ let curSp=null;
 function viewSp(s){
   const G=GROUPS[s.g],list=s.f.sp,i=list.indexOf(s),prev=list[i-1],next=list[i+1];
   $("view").innerHTML=crumbs([[G.name,s.g],[s.ord,s.o.key],[s.fam,s.f.key],[s.n]])+
-   `<article class="fiche${rev?" rev":""}" style="--cc:var(${G.color})"><div class="fhead"><div><p class="level">Fiche technique</p><h1>${esc(s.n)}</h1><a class="lg" style="margin-top:8px" href="#${s.ok?"verifiees":"a-verifier"}" title="Voir toutes ces fiches">${badge(s)} Voir la liste</a></div>
+   `<article class="fiche${rev?" rev":""}" style="--cc:var(${G.color})"><div class="fhead"><div><p class="level">Fiche technique</p><h1>${esc(s.n)}</h1><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${(s.niv?[].concat(s.niv):["N"]).map(k=>`<span class="badge ok">${TABS[k]}</span>`).join("")}</div></div>
    <div class="ftools"><button type="button" id="rand">Fiche au hasard</button></div></div>
    <figure class="photo" hidden><img alt="Photo : ${esc(s.n)}"><figcaption>Photo : <a href="#" target="_blank" rel="noopener">Wikipédia</a></figcaption></figure>
    ${rev?`<div class="hint">Mode révision : cliquez sur une réponse floutée pour la dévoiler.</div>`:""}

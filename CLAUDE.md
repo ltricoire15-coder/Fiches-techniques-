@@ -16,8 +16,8 @@ directement sur GitHub (branche `main`) : chaque push met le lien à jour.
   pour amphibiens/reptiles, température pour les autres), durée de vie (`vie`), taille adulte (`tai`).
 - Groupe `g` : `poi`, `amp`, `rep`, `ois`, `mam` ou `inv`. Les espèces d'un même ordre et d'une même
   famille restent regroupées dans le tableau.
-- Badge : `ok:true` uniquement pour les fiches envoyées par l'enseignant(e) (« ✓ Vérifié »).
-  Toute fiche rédigée par Claude reste sans `ok` (« ⚠ À vérifier »).
+- Toutes les fiches viennent de l'utilisateur : mettre `ok:true` (champ gardé dans les données, plus
+  affiché). Les boutons Vérifié / À vérifier ont été remplacés par les boutons Terminale / Première.
 - Onglet : `niv:"T"` (Terminale), `niv:"P"` (Première) ou `niv:["T","P"]`, selon ce que demande
   l'utilisateur. Sans `niv`, la fiche va dans l'onglet « Non classées » (affiché seulement s'il en reste).
 - Nouvelles fiches envoyées pour la Première : `ok:true`, `niv:"P"`, et elles remplacent la fiche
