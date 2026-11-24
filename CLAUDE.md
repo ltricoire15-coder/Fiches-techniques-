@@ -23,6 +23,7 @@ directement sur GitHub (branche `main`) : chaque push met le lien à jour.
 - Nouvelles fiches envoyées pour la Première : `ok:true`, `niv:"P"`, et elles remplacent la fiche
   existante de la même espèce. Seule exception : les 12 fiches vérifiées de Terminale ne sont jamais
   remplacées (on les laisse telles quelles et on signale l'espèce ignorée à l'utilisateur).
+- Reproduction (`rep`) : uniquement « Ovipare », « Vivipare » ou « Ovovivipare », sans détail.
 - Formats : températures « 22 – 28 °C », pH « pH 6 – 7,5 », dureté « GH 5 – 15 °dGH ».
 
 ## Technique (ne pas casser)
