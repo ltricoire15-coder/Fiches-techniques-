@@ -18,7 +18,7 @@ directement sur GitHub (branche `main`) : chaque push met le lien à jour.
   famille restent regroupées dans le tableau.
 - Toutes les fiches viennent de l'utilisateur : mettre `ok:true` (champ gardé dans les données, plus
   affiché). Les boutons Vérifié / À vérifier ont été remplacés par les boutons Terminale / Première.
-- Onglet : `niv:"T"` (Terminale), `niv:"P"` (Première) ou `niv:["T","P"]`, selon ce que demande
+- Onglet : `niv:"T"` (Terminale), `niv:"P"` (Première), `"E"` (Évaluation) ou une liste comme `niv:["T","E"]`, selon ce que demande
   l'utilisateur. Sans `niv`, la fiche va dans l'onglet « Non classées » (affiché seulement s'il en reste).
 - Nouvelles fiches envoyées pour la Première : `ok:true`, `niv:"P"`, et elles remplacent la fiche
   existante de la même espèce. Seule exception : les 12 fiches vérifiées de Terminale ne sont jamais
