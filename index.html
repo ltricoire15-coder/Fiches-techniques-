@@ -226,7 +226,7 @@ function spTile(s){
 
 function viewHome(){
   const tiles=Object.keys(GROUPS).map(k=>{
-    const G=GROUPS[k],T=TREE[k];if(!T)return"";
+    const G=GROUPS[k],T=TREE[k];if(!T)return tile(k,G.color,G.name,"Aucune fiche pour l'instant","","Ouvrir");
     const n=T.orders.reduce((a,o)=>a+countSp(o),0);
     return tile(k,G.color,G.name,`${plural(T.orders.length,"ordre","ordres")} · ${plural(n,"espèce","espèces")}`,T.orders.map(o=>esc(o.name.replace(/ \(.*\)/,""))).join(", "),"Voir les ordres");
   }).join("");
@@ -237,7 +237,7 @@ function viewHome(){
    <div id="res"></div>`;
   const draw=()=>{
     const nq=norm(q);
-    if(!nq){$("res").innerHTML=tiles.trim()?`<div class="tiles big">${tiles}</div>`:`<p class="empty">Aucune fiche dans l'onglet ${TABS[tab]} pour l'instant.</p>`;return}
+    if(!nq){$("res").innerHTML=`<div class="tiles big">${tiles}</div>`;return}
     const r=V().filter(s=>norm([s.n,s.sci,s.ord,s.fam,s.cla].join(" ")).includes(nq));
     $("res").innerHTML=r.length?`<p class="level">${plural(r.length,"résultat","résultats")}</p><div class="tiles">${r.map(spTile).join("")}</div>`:`<p class="empty">Aucune espèce ne correspond à « ${esc(q)} ».</p>`;
   };
@@ -246,6 +246,7 @@ function viewHome(){
 }
 function viewGroup(k){
   const G=GROUPS[k],T=TREE[k];
+  if(!T){$("view").innerHTML=crumbs([[G.name]])+`<div class="hero" style="--cc:var(${G.color})"><p class="level">Catégorie · ${TABS[tab]}</p><h1>${G.name}</h1><p class="lead">Aucune fiche dans cette catégorie pour l'instant.</p></div>`;return}
   $("view").innerHTML=crumbs([[G.name]])+`<div class="hero" style="--cc:var(${G.color})"><p class="level">Catégorie</p><h1>${G.name}</h1><p class="lead">Choisissez un ordre.</p></div>
    <div class="tiles">${T.orders.map(o=>tile(o.key,G.color,esc(o.name),`${plural(o.fams.length,"famille","familles")} · ${plural(countSp(o),"espèce","espèces")}`,o.fams.map(f=>esc(f.name.replace(/ \(.*\)/,""))).join(", "),"Voir les familles")).join("")}</div>`;
 }
@@ -316,7 +317,7 @@ function route(){
   if(sp&&!inTab(sp))setTab(sp.niv?[].concat(sp.niv)[0]:"N",false);
   if(sp)viewSp(sp);
   else if(h==="verifiees"||h==="a-verifier")viewList(h==="verifiees");
-  else if(TREE[h])viewGroup(h);
+  else if(GROUPS[h])viewGroup(h);
   else if((m=h.match(/^([a-z]{3})-(\d+)(?:-(\d+))?$/))&&TREE[m[1]]&&TREE[m[1]].orders[m[2]-1]){
     const o=TREE[m[1]].orders[m[2]-1];
     if(m[3]&&o.fams[m[3]-1])viewFam(m[1],o,o.fams[m[3]-1]); else viewOrder(m[1],o);
