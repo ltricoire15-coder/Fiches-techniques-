@@ -278,7 +278,7 @@ function drawTabs(){ $("count").textContent="· "+TABS[tab]; }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)setTab(b.dataset.tab,true)});
 function setTab(k,home){
   if(!TABS[k])return; tab=k; try{localStorage.setItem("onglet",k)}catch(e){}
-  buildTree(); drawTabs(); if(home)nav("accueil");
+  if(k!=="E")evalNiv=null; buildTree(); drawTabs(); if(home)nav("accueil");
 }
 drawTabs();
 
@@ -292,7 +292,23 @@ function spTile(s){
   return tile(s.id,GROUPS[s.g].color,esc(s.n),`<i class="sci">${esc(s.sci)}</i>`,"","Voir la fiche");
 }
 
+/* Onglet Évaluation : choix du niveau puis liste directe des fiches ; tirage au hasard seulement ici */
+let evalNiv=null;
+const evalList=k=>S.filter(s=>inTab(s,"E")&&inTab(s,k));
+function viewEvalHome(){
+  $("view").innerHTML=`<div class="hero"><p class="level">Bac pro TCVA · Évaluation</p><h1>Fiches techniques animalerie</h1>
+   <p class="lead">Choisissez le niveau pour afficher les fiches de l'évaluation.</p></div>${tabsHtml()}
+   <div class="tiles big">${["P","T"].map(k=>tile("eval-"+k,"--accent",TABS[k],plural(evalList(k).length,"fiche","fiches"),evalList(k).map(s=>esc(s.n)).join(", "),"Voir les fiches")).join("")}</div>`;
+}
+function viewEvalList(k){
+  evalNiv=k; const L=evalList(k);
+  $("view").innerHTML=crumbs([[TABS[k]]])+`<div class="hero"><p class="level">Évaluation</p><h1>${TABS[k]}</h1><p class="lead">${plural(L.length,"fiche","fiches")} à réviser.</p>
+   ${L.length?`<button type="button" id="rand" class="lg niv" style="margin-top:4px">Fiche au hasard</button>`:""}</div>
+   ${L.length?`<div class="tiles">${L.map(spTile).join("")}</div>`:`<p class="empty">Aucune fiche pour l'instant.</p>`}`;
+  if(L.length)$("rand").onclick=()=>nav(L[Math.floor(Math.random()*L.length)].id);
+}
 function viewHome(){
+  if(tab==="E")return viewEvalHome();
   const tiles=Object.keys(GROUPS).map(k=>{
     const G=GROUPS[k],T=TREE[k];if(!T)return tile(k,G.color,G.name,"Aucune fiche pour l'instant","","Ouvrir");
     const n=T.orders.reduce((a,o)=>a+countSp(o),0);
@@ -355,14 +371,15 @@ async function photoFor(s){
 let curSp=null;
 function viewSp(s){
   const G=GROUPS[s.g],list=s.f.sp,i=list.indexOf(s),prev=list[i-1],next=list[i+1];
-  $("view").innerHTML=crumbs([[G.name,s.g],[s.ord,s.o.key],[s.fam,s.f.key],[s.n]])+
+  const ev=tab==="E"&&evalNiv&&evalList(evalNiv).includes(s);
+  $("view").innerHTML=(ev?crumbs([[TABS[evalNiv],"eval-"+evalNiv],[s.n]]):crumbs([[G.name,s.g],[s.ord,s.o.key],[s.fam,s.f.key],[s.n]]))+
    `<article class="fiche${rev?" rev":""}" style="--cc:var(${G.color})"><div class="fhead"><div><p class="level">Fiche technique</p><h1>${esc(s.n)}</h1><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${(s.niv?[].concat(s.niv):["N"]).map(k=>`<span class="badge ok">${TABS[k]}</span>`).join("")}</div></div>
-   <div class="ftools"><button type="button" id="rand">Fiche au hasard</button></div></div>
+   ${tab==="E"&&evalNiv?`<div class="ftools"><button type="button" id="rand">Fiche au hasard</button></div>`:""}</div>
    <figure class="photo" hidden><img alt="Photo : ${esc(s.n)}"><figcaption>Photo : <a href="#" target="_blank" rel="noopener">Wikipédia</a></figcaption></figure>
    ${rev?`<div class="hint">Mode révision : cliquez sur une réponse floutée pour la dévoiler.</div>`:""}
    <dl>${FIELDS.map(([l,fn],j)=>`<div><dt>${typeof l==="function"?l(s):l}</dt><dd ${rev?'tabindex="0"':""} class="${j===0?"shown":""}"><span class="v">${fn(s)}</span></dd></div>`).join("")}</dl></article>
    <div class="pager">${prev?`<a href="#${prev.id}">← ${esc(prev.n)}</a>`:`<a href="#${s.f.key}">← Retour à la famille</a>`}${next?`<a href="#${next.id}">${esc(next.n)} →</a>`:`<a href="#${s.f.key}">Retour à la famille →</a>`}</div>`;
-  $("rand").onclick=()=>{const L=V();nav(L[Math.floor(Math.random()*L.length)].id)};
+  if(tab==="E"&&evalNiv){const L=evalList(evalNiv);$("rand").onclick=()=>nav(L[Math.floor(Math.random()*L.length)].id)}
   curSp=s;
   const fig=$("view").querySelector(".photo");
   photoFor(s).then(p=>{if(!p||curSp!==s||!fig.isConnected)return;const im=fig.querySelector("img");im.onload=()=>{fig.hidden=false};im.src=p.src;const a=fig.querySelector("a");if(p.page)a.href=p.page;else a.removeAttribute("href")});
@@ -382,9 +399,10 @@ function route(){
   const h=curH;
   let m;
   const sp=S.find(s=>s.id===h);
-  if(sp&&!inTab(sp))setTab(sp.niv?[].concat(sp.niv)[0]:"N",false);
+  if(sp&&!inTab(sp)){evalNiv=null;setTab(sp.niv?[].concat(sp.niv)[0]:"N",false);}
   if(sp)viewSp(sp);
   else if(h==="verifiees"||h==="a-verifier")viewList(h==="verifiees");
+  else if(h==="eval-P"||h==="eval-T"){if(tab!=="E")setTab("E",false);viewEvalList(h.slice(5));}
   else if(GROUPS[h])viewGroup(h);
   else if((m=h.match(/^([a-z]{3})-(\d+)(?:-(\d+))?$/))&&TREE[m[1]]&&TREE[m[1]].orders[m[2]-1]){
     const o=TREE[m[1]].orders[m[2]-1];
