@@ -390,29 +390,65 @@ function sayFix(x){
    .replace(/°C/g," degrés").replace(/\bpH\b/g,"pé ache").replace(/(\d)\s*%/g,"$1 pour cent").replace(/(\d)\s*cm\b/g,"$1 centimètres")
    .replace(/(\d)\s*kg\b/g,"$1 kilos").replace(/(\d)\s*m\b/g,"$1 mètres").replace(/(\d)\s*L\b/g,"$1 litres").replace(/ ; /g,", ").replace(/≈|~/g,"environ ");
 }
+/* Texte parlé : une petite explication rédigée à partir de la fiche (pas une énumération) */
+const GN={poi:"Ce poisson",amp:"Cet amphibien",rep:"Ce reptile",ois:"Cet oiseau",mam:"Ce mammifère",inv:"Cet insecte"};
+const FEM=/^(carpe|loche|colombe|caille|poule|perruche|amazone|tortue|souris|gerbille|rainette|mygale)\b/i;
+const PROPER=/^(Siam|Heckel|Bichenov|Gould|Japon|Chine|Virginie|Californie|Bourke|Fischer|Floride|Inde|Bombay|X)$/;
+function spokenName(n){
+  const m=n.match(/^(.*?)\s*\((.*)\)\s*$/); let base=m?m[1]:n, alias=m?m[2]:"";
+  base=base.split(" ").map((w,i)=>PROPER.test(w)?w:(i===0?w.toLowerCase():w)).join(" ");
+  const art=/^[aeiouyéèêâîôûh]/i.test(base)?"l'":FEM.test(base)?"la ":"le ";
+  return art+base+(alias?", aussi appelé "+alias.replace(/,\s*/g," ou ").toLowerCase():"");
+}
+function fromPlace(o){
+  o=o.replace(/\s*:\s*/g,", ").replace(/\s*\((.*?)\)/g,", $1");
+  if(/^(Japon|Mexique|Chili|Kenya|Moyen-Orient|Sud|Nord|Brésil|Pérou|Venezuela)/.test(o))return "du "+o;
+  if(/^(Philippines|États-Unis|Îles|Océans)/.test(o))return "des "+o.replace(/^Océans/,"océans");
+  return (/^[AEIOUYÉÈÎ]/.test(o)?"d'":"de ")+o;
+}
+const ALIM=/^(omnivore|carnivore|herbivore|granivore|frugivore|insectivore|détritivore|algivore|jeune)/i;
+const REPX={"Ovipare":"C'est un animal ovipare : la femelle pond des œufs.","Vivipare":"C'est un animal vivipare : les petits naissent déjà formés.","Ovovivipare":"C'est un animal ovovivipare : les œufs éclosent dans le ventre de la femelle, et les petits naissent vivants."};
+const CLA2={"Actinoptérygiens":"des actinoptérygiens, les poissons à nageoires rayonnées","Mammifères":"des mammifères, qui allaitent leurs petits","Reptiles":"des reptiles, à la peau couverte d'écailles","Amphibiens":"des amphibiens","Oiseaux":"des oiseaux","Insectes":"des insectes, qui ont six pattes"};
+function sexPair(x,verb){
+  const m=x.match(/^(Mâle|Femelle)\s+(.+?)\s*[·,]\s*(mâle|femelle)\s+(.+)$/i);
+  if(m)return `le ${m[1].toLowerCase()} ${verb} ${m[2]}, et la ${m[3].toLowerCase()} ${m[4]}`.replace(/le femelle/,"la femelle").replace(/la mâle/,"le mâle");
+  return null;
+}
 function sayText(s){
-  const v=(k,pre,post="")=>s[k]&&s[k]!==SAY_SKIP?pre+sayFix(s[k])+post:"";
-  return [`Fiche technique : ${s.n}.`,`Son nom scientifique est ${s.sci.replace(/\s*\(.*\)/,"")}.`,
-   `C'est une espèce ${s.st===D?"domestique":"non domestique"}.`,
-   `Classe des ${s.cla.replace(/\s*\(.*\)/,"")}, ordre des ${sayFix(s.ord)}, famille des ${sayFix(s.fam)}.`,
-   v("ori","Origine : ","."),v("bio","Biotope : ","."),v("reg","Régime alimentaire : ","."),v("rep","Reproduction : ","."),
-   v("dim","Dimorphisme sexuel : "," "),v("comp","Comportement : ","."),v("acc","Accessoires : ","."),
-   v("par",(s.pl||"Paramètres")+" : ","."),v("vie","Durée de vie : ","."),v("tai","Taille adulte : ",".")].filter(Boolean).join(" ").replace(/\.\s*\./g,".");
+  const ok=k=>s[k]&&s[k]!==SAY_SKIP, F=k=>sayFix(s[k]).replace(/\s+/g," ").trim();
+  const lc=x=>x&&/^[A-ZÉ][a-zéèêàâîôûç]/.test(x)?x[0].toLowerCase()+x.slice(1):x, dot=x=>x.replace(/[.\s]+$/,"")+".";
+  const sci=s.sci.replace(/\s*\(.*\)/,""), cla=s.cla.replace(/\s*\(.*\)/,"");
+  const emb=/Arthropode/.test(s.emb)?"des arthropodes":"des vertébrés";
+  const P=[];
+  P.push(`${GN[s.g]||"Cet animal"}, c'est ${spokenName(s.n)}. Son nom scientifique est ${sci}, et c'est une espèce ${s.st===D?"domestique":"non domestique"}.`);
+  P.push(`Il fait partie ${emb}, dans la classe ${CLA2[cla]||"des "+cla.toLowerCase()}. On le range dans l'ordre des ${sayFix(s.ord)}, famille des ${sayFix(s.fam)}.`);
+  if(ok("ori"))P.push(`Il est originaire ${dot(fromPlace(F("ori")))}`+(ok("bio")?` Dans la nature, il vit dans ce type de milieu : ${dot(lc(F("bio")))}`:""));
+  else if(ok("bio"))P.push(`Dans la nature, il vit dans ce type de milieu : ${dot(lc(F("bio")))}`);
+  if(ok("reg"))P.push(ALIM.test(s.reg)?`Pour se nourrir, il est ${dot(lc(F("reg")))}`:`Pour se nourrir, il mange : ${dot(lc(F("reg")))}`);
+  if(ok("rep"))P.push(REPX[s.rep]||"");
+  if(ok("dim"))P.push(`Pour différencier le mâle de la femelle : ${dot(lc(F("dim")))}`);
+  if(ok("comp"))P.push(`Côté comportement, on retiendra : ${dot(lc(F("comp")))}`);
+  if(ok("acc"))P.push(`Pour l'accueillir, il faut prévoir : ${dot(lc(F("acc")))}`);
+  if(ok("par"))P.push(`${s.g==="poi"||/eau/i.test(s.pl)?"Pour l'eau, on recherche":"Pour la température, on recherche"} : ${dot(F("par"))}`);
+  const v=ok("vie")?(sexPair(F("vie"),"vit")||"il vit "+lc(F("vie"))):"";
+  const ta=ok("tai")?(sexPair(F("tai"),/kilos/.test(F("tai"))?"pèse":"mesure")||(/kilos/.test(F("tai"))?"il pèse ":"il mesure ")+lc(F("tai"))):"";
+  if(v||ta)P.push("Enfin, "+[v,ta&&(ta+" à l'âge adulte")].filter(Boolean).join(", et ")+".");
+  return P.filter(Boolean).join(" ").replace(/\s+/g," ").replace(/\.\./g,".").replace(/ ,/g,",");
 }
 let sayVoice=null;
 function pickVoice(){
   try{const vs=speechSynthesis.getVoices().filter(x=>/^fr/i.test(x.lang));
-    sayVoice=vs.find(x=>/Amélie|Amelie|Audrey|Thomas|Google français|Denise|Henri/i.test(x.name))||vs.find(x=>/fr-FR/i.test(x.lang))||vs[0]||null}catch(e){}
+    sayVoice=vs.find(x=>/Natural|Premium|Enhanced|Neural|Online|Siri/i.test(x.name))||vs.find(x=>/Amélie|Amelie|Audrey|Google français|Denise|Vivienne|Thomas|Henri/i.test(x.name))||vs.find(x=>/fr-FR/i.test(x.lang))||vs[0]||null}catch(e){}
 }
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
 function stopSay(){try{speechSynthesis.cancel()}catch(e){}const w=document.querySelector(".voice");if(w)w.classList.remove("on")}
 /* vitesse adaptée pour viser 30 à 45 secondes (≈ 2,6 mots/s à vitesse normale) */
-const sayRate=s=>Math.min(1.35,Math.max(1,sayText(s).split(/\s+/).length/(2.6*43)));
+const sayRate=s=>Math.min(1.05,Math.max(0.92,sayText(s).split(/\s+/).length/(2.6*55)));
 function voiceBox(s){
   if(!("speechSynthesis" in window))return "";
   const words=sayText(s).split(/\s+/).length, sec=Math.round(words/(2.6*sayRate(s)));
   return `<div class="voice" id="voice"><div class="face" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5z"/></svg></div>
-   <div class="vt"><b>Écouter la fiche</b><span>Une voix lit et résume la fiche (environ ${sec} secondes)</span><div class="vbar"><i id="vbar"></i></div></div>
+   <div class="vt"><b>Écouter la fiche</b><span>Une voix calme vous explique la fiche (environ ${sec} secondes)</span><div class="vbar"><i id="vbar"></i></div></div>
    <button type="button" id="vplay" class="lg niv" aria-pressed="false">▶ Écouter</button></div>`;
 }
 function wireVoice(s){
@@ -422,7 +458,7 @@ function wireVoice(s){
     if(box.classList.contains("on")){stopSay();b.textContent="▶ Écouter";b.setAttribute("aria-pressed","false");return}
     try{
       speechSynthesis.cancel(); const txt=sayText(s), u=new SpeechSynthesisUtterance(txt);
-      u.lang="fr-FR"; if(sayVoice)u.voice=sayVoice; u.rate=sayRate(s);
+      u.lang="fr-FR"; if(sayVoice)u.voice=sayVoice; u.rate=sayRate(s); u.pitch=0.95;
       u.onboundary=e=>{const bar=$("vbar");if(bar)bar.style.width=Math.min(100,100*e.charIndex/txt.length)+"%"};
       u.onend=u.onerror=()=>{const bx=$("voice");if(bx)bx.classList.remove("on");const bb=$("vplay");if(bb){bb.textContent="▶ Écouter";bb.setAttribute("aria-pressed","false")}const bar=$("vbar");if(bar)bar.style.width="100%"};
       box.classList.add("on"); b.textContent="■ Arrêter"; b.setAttribute("aria-pressed","true"); speechSynthesis.speak(u);
