@@ -111,6 +111,10 @@ dd .sci{font-style:italic;font-size:1.05rem}
 .cw .c input{width:100%;height:100%;border:1px solid var(--accent);border-radius:4px;background:var(--surface);color:var(--ink);text-align:center;font:600 15px/1 var(--f-body);text-transform:uppercase;padding:0}
 .cw .c input.ok{background:var(--dom-bg);border-color:var(--dom);color:var(--dom)}
 .cw .c input.ko{background:var(--nd-bg);border-color:var(--nd);color:var(--nd)}
+.playing dl,.playing .photo,.playing .voice{filter:blur(7px);pointer-events:none;user-select:none}
+.playmode .crumbs a:not(:first-child),.playmode .crumbs span:not(.sep){filter:blur(5px)}
+.cw .c input.hint{background:var(--accent-soft);border-style:dashed}
+.qhint{font-size:.85rem;color:var(--muted)}
 .cw .c sup{position:absolute;top:1px;left:2px;font-size:8px;color:var(--muted);pointer-events:none;line-height:1}
 .clues{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 20px;font-size:.9rem;margin-top:8px}
 .clues h4{margin:6px 0 2px;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -592,8 +596,8 @@ function makeQuiz(s){
   return out;
 }
 function quizBox(){
-  return `<div class="quiz" id="quiz"><div class="qhead"><div><b>Jeux de révision</b><span>Tous les termes de la fiche : quiz ou mots croisés</span></div>
-   <div class="gbtns"><button type="button" id="qstart" class="lg niv">Quiz</button><button type="button" id="cwstart" class="lg niv">Mots croisés</button></div></div><div id="qzone"></div></div>`;
+  return `<div class="quiz" id="quiz"><div class="qhead"><div><b>Jeux de révision</b><span>Tous les termes de la fiche : quiz ou mots croisés. La fiche est floutée pendant le jeu.</span></div>
+   <div class="gbtns"><button type="button" id="qstart" class="lg niv">Quiz</button><button type="button" id="cwstart" class="lg niv">Mots croisés</button><button type="button" id="gclose" class="lg niv" hidden>Fermer le jeu</button></div></div><div id="qzone"></div></div>`;
 }
 /* Mots croisés : mots tirés de la fiche, grille construite automatiquement */
 const W=x=>String(x||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z]/g,"");
@@ -601,7 +605,6 @@ const firstWord=x=>String(x||"").replace(/\s*\(.*?\)/g,"").trim().split(/[\s,;:�
 function cwWords(s){
   const sci=s.sci.replace(/\s*\(.*\)/,"").split(/\s+/), L=[];
   const add=(w,clue)=>{w=W(w);if(w.length>=3&&w.length<=16&&!L.some(x=>x.w===w))L.push({w,clue})};
-  add(firstWord(s.n),"Nom commun (premier mot)");
   add(sci[0],"Genre (nom scientifique)"); add(sci[1],"Espèce (nom scientifique)");
   add(s.st===D?"Domestique":"Nondomestique","Statut juridique (en un seul mot)");
   add(firstWord(s.emb),"Embranchement"); add(s.cla.replace(/\s*\(.*\)/,""),"Classe");
@@ -641,7 +644,14 @@ function buildCw(words){
     }
   }
 }
+/* Pendant un jeu : la fiche (rubriques, photo, audio, fil d'Ariane) est floutée ; « Fermer le jeu » la rend lisible */
+function playMode(on){
+  const a=document.querySelector("article.fiche"); if(a)a.classList.toggle("playing",on);
+  document.getElementById("view").classList.toggle("playmode",on);
+  const x=$("gclose"); if(x)x.hidden=!on; if(on)stopSay();
+}
 function showCw(s){
+  playMode(true);
   const z=$("qzone"); const X=buildCw(cwWords(s)); if(!X){z.textContent="";return}
   const cells={},num={}; let n=0;
   X.P.sort((a,b)=>a.r-b.r||a.c-b.c).forEach(p=>{const k=p.r+","+p.c;if(!num[k])num[k]=++n;p.n=num[k];
@@ -653,18 +663,31 @@ function showCw(s){
   z.innerHTML=`<p class="qnum">${X.P.length} mots à trouver · sans accents ni espaces</p>
    <div class="cw-wrap"><div class="cw" style="grid-template-columns:repeat(${X.cols},30px)">${g}</div></div>
    <div class="clues"><div><h4>Horizontal →</h4>${cl(0)}</div><div><h4>Vertical ↓</h4>${cl(1)}</div></div>
-   <div class="qfoot"><span class="qmsg" id="qmsg" aria-live="polite"></span><span class="gbtns"><button type="button" class="lg niv" id="cwcheck">Vérifier</button><button type="button" class="lg niv" id="cwsol">Solution</button></span></div>`;
+   <div class="qfoot"><span class="qmsg" id="qmsg" aria-live="polite"></span><span class="gbtns"><button type="button" class="lg niv" id="cwhint">Coup de pouce (3)</button><button type="button" class="lg niv" id="cwcheck">Vérifier</button><button type="button" class="lg niv" id="cwsol">Solution</button></span></div>
+   <p class="qhint">Coup de pouce : révèle une lettre d'un mot pas encore trouvé (3 par grille).</p>`;
   const ins=[...z.querySelectorAll(".cw input")];
   ins.forEach((inp,ix)=>inp.addEventListener("input",()=>{inp.value=W(inp.value).slice(-1);inp.classList.remove("ok","ko");
     if(inp.value){const [r,c]=inp.dataset.k.split(",").map(Number);const nx=z.querySelector(`input[data-k="${r},${c+1}"]`)||z.querySelector(`input[data-k="${r+1},${c}"]`);if(nx&&!nx.value)nx.focus()}}));
   $("cwcheck").onclick=()=>{let ok=0;ins.forEach(i=>{const g=i.value===cells[i.dataset.k];i.classList.toggle("ok",g);i.classList.toggle("ko",!!i.value&&!g);if(g)ok++});
     const words=X.P.filter(p=>[...p.w].every((ch,i)=>z.querySelector(`input[data-k="${p.r+(p.d?i:0)},${p.c+(p.d?0:i)}"]`).value===ch)).length;
     $("qmsg").textContent=words===X.P.length?"Bravo, grille complète !":`${words} / ${X.P.length} mots trouvés`};
+  let hints=3;
+  $("cwhint").onclick=()=>{
+    if(!hints)return;
+    const todo=X.P.filter(p=>[...p.w].some((ch,i)=>z.querySelector(`input[data-k="${p.r+(p.d?i:0)},${p.c+(p.d?0:i)}"]`).value!==ch));
+    if(!todo.length){$("qmsg").textContent="Tous les mots sont déjà trouvés !";return}
+    const p=todo[Math.floor(Math.random()*todo.length)];
+    const free=[...p.w].map((ch,i)=>z.querySelector(`input[data-k="${p.r+(p.d?i:0)},${p.c+(p.d?0:i)}"]`)).filter(inp=>inp.value!==cells[inp.dataset.k]);
+    const inp=free[0]; inp.value=cells[inp.dataset.k]; inp.classList.add("hint"); inp.classList.remove("ko");
+    hints--; $("cwhint").textContent=`Coup de pouce (${hints})`; if(!hints)$("cwhint").disabled=true;
+    $("qmsg").textContent=`Lettre révélée dans le mot ${p.n} : ${esc(p.clue)}`;
+  };
   $("cwsol").onclick=()=>{ins.forEach(i=>{i.value=cells[i.dataset.k];i.classList.add("ok");i.classList.remove("ko")});$("qmsg").textContent="Voici la solution."};
 }
 function wireQuiz(s){
   const st=$("qstart"); if(!st)return;
   let Q=[],i=0,score=0;
+  let jokers=2;
   const show=()=>{
     const z=$("qzone"); if(!z)return;
     if(i>=Q.length){
@@ -675,17 +698,22 @@ function wireQuiz(s){
     const c=Q[i];
     z.innerHTML=`<p class="qnum">Question ${i+1} / ${Q.length} · Score : ${score}</p><p class="qq">${esc(c.q)}</p>
      <div class="opts">${c.opts.map((o,j)=>`<button type="button" class="opt" data-j="${j}">${esc(o)}</button>`).join("")}</div>
-     <div class="qfoot"><span class="qmsg" id="qmsg" aria-live="polite"></span><button type="button" class="lg niv" id="qnext" hidden>${i+1<Q.length?"Question suivante":"Voir le score"}</button></div>`;
+     <div class="qfoot"><span class="qmsg" id="qmsg" aria-live="polite"></span><span class="gbtns"><button type="button" class="lg niv" id="qjoker" ${jokers&&c.opts.length>2?"":"disabled"}>Coup de pouce 50/50 (${jokers})</button><button type="button" class="lg niv" id="qnext" hidden>${i+1<Q.length?"Question suivante":"Voir le score"}</button></span></div>
+     <p class="qhint">Coup de pouce : retire deux mauvaises réponses (2 par partie).</p>`;
+    $("qjoker").onclick=()=>{if(!jokers)return;jokers--;let n=0;
+      shuffle([...z.querySelectorAll(".opt")]).forEach(b=>{if(n<2&&c.opts.length-n>2&&c.opts[+b.dataset.j]!==c.good){b.disabled=true;b.style.opacity=".35";n++}});
+      $("qjoker").disabled=true;$("qjoker").textContent=`Coup de pouce 50/50 (${jokers})`};
     z.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
-      const ok=c.opts[+b.dataset.j]===c.good; if(ok)score++;
+      const ok=c.opts[+b.dataset.j]===c.good; if(ok)score++; $("qjoker").disabled=true;
       z.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(c.opts[+x.dataset.j]===c.good)x.classList.add("good")});
       if(!ok)b.classList.add("bad");
       $("qmsg").textContent=ok?"Bonne réponse !":"Raté, la bonne réponse est en vert.";
       const n=$("qnext");n.hidden=false;n.focus();n.onclick=()=>{i++;show()};
     });
   };
-  function start(){Q=makeQuiz(s);i=0;score=0;show()}
+  function start(){playMode(true);Q=makeQuiz(s);i=0;score=0;jokers=2;show()}
   st.onclick=start; $("cwstart").onclick=()=>showCw(s);
+  $("gclose").onclick=()=>{playMode(false);$("qzone").innerHTML=""};
 }
 let curSp=null;
 function viewSp(s){

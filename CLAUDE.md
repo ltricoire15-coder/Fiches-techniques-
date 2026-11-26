@@ -48,7 +48,8 @@ directement sur GitHub (branche `main`) : chaque push met le lien à jour.
 ## Jeux de révision
 
 - Sur chaque fiche : quiz à choix multiples sur toutes les rubriques (`makeQuiz`) et mots croisés (`cwWords`/`buildCw`),
-  générés automatiquement ; rien à faire quand on ajoute une fiche.
+  générés automatiquement ; rien à faire quand on ajoute une fiche. Pendant un jeu, la fiche est floutée
+  (`playMode`) ; coups de pouce : 3 lettres révélées par grille, 2 jokers 50/50 par quiz.
 - Onglets Terminale et Première : « Jeu des images » (`#jeu-images`) sur les fiches de l'onglet ayant une photo,
   3 niveaux : Facile (3 propositions), Intermédiaire (voyelles visibles), Expert (nombre de lettres seulement).
   Penser à ajouter la photo (`PHOTOS`) de chaque nouvelle fiche.
