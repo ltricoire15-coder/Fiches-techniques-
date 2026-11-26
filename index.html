@@ -375,7 +375,8 @@ function viewImgGame(lvl){
   const round=()=>{
     if(!pool.length){$("view").innerHTML=crumbs([["Jeu des images","jeu-images"],[LV[lvl]]])+`<p class="empty">Aucune photo dans cet onglet pour l'instant.</p>`;return}
     const s=pool[i%pool.length], nm=baseName(s.n), letters=nm.replace(/[^a-zà-ÿ]/gi,"").length;
-    const opts=lvl==="facile"?shuffle([nm,...shuffle(V().filter(x=>baseName(x.n)!==nm)).slice(0,2).map(x=>baseName(x.n))]):null;
+    const others=V().filter(x=>baseName(x.n)!==nm), sameOrd=shuffle(others.filter(x=>x.g===s.g&&x.ord===s.ord)), sameGrp=shuffle(others.filter(x=>x.g===s.g&&x.ord!==s.ord));
+    const opts=lvl==="facile"?shuffle([nm,...[...new Set([...sameOrd,...sameGrp,...shuffle(others)].map(x=>baseName(x.n)))].slice(0,2)]):null;
     $("view").innerHTML=crumbs([["Jeu des images","jeu-images"],[LV[lvl]]])+`<div class="hero"><p class="level">${TABS[tab]} · Niveau ${LV[lvl]}</p><h1>Quel est cet animal ?</h1>
      <p class="lead">Score : ${score} / ${done}</p></div>
      <div class="ig"><div class="pic"><img alt="Photo de l'animal à deviner" src="${esc(PHOTOS[slugSci(s.sci)][0])}"></div><div class="body quiz" style="border:0;padding:0">
