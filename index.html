@@ -428,8 +428,6 @@ function sayText(s){
   if(ok("rep"))P.push(REPX[s.rep]||"");
   if(ok("dim"))P.push(`Pour différencier le mâle de la femelle : ${dot(lc(F("dim")))}`);
   if(ok("comp"))P.push(`Côté comportement, on retiendra : ${dot(lc(F("comp")))}`);
-  if(ok("acc"))P.push(`Pour l'accueillir, il faut prévoir : ${dot(lc(F("acc")))}`);
-  if(ok("par"))P.push(`${s.g==="poi"||/eau/i.test(s.pl)?"Pour l'eau, on recherche":"Pour la température, on recherche"} : ${dot(F("par"))}`);
   const v=ok("vie")?(sexPair(F("vie"),"vit")||"il vit "+lc(F("vie"))):"";
   const ta=ok("tai")?(sexPair(F("tai"),/kilos/.test(F("tai"))?"pèse":"mesure")||(/kilos/.test(F("tai"))?"il pèse ":"il mesure ")+lc(F("tai"))):"";
   if(v||ta)P.push("Enfin, "+[v,ta&&(ta+" à l'âge adulte")].filter(Boolean).join(", et ")+".");
