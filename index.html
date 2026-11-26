@@ -439,28 +439,45 @@ function pickVoice(){
     sayVoice=vs.find(x=>/Natural|Premium|Enhanced|Neural|Online|Siri/i.test(x.name))||vs.find(x=>/Amélie|Amelie|Audrey|Google français|Denise|Vivienne|Thomas|Henri/i.test(x.name))||vs.find(x=>/fr-FR/i.test(x.lang))||vs[0]||null}catch(e){}
 }
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
-function stopSay(){try{speechSynthesis.cancel()}catch(e){}const w=document.querySelector(".voice");if(w)w.classList.remove("on")}
+/* Audio : MP3 « voix humaine » rangé dans audio/<nom-latin>.mp3 (voix OpenAI), sinon voix de l'appareil */
+const AUDIO_SRC=sl=>["https://cdn.jsdelivr.net/gh/ltricoire15-coder/Fiches-techniques-@main/audio/"+sl+".mp3","https://raw.githubusercontent.com/ltricoire15-coder/Fiches-techniques-/main/audio/"+sl+".mp3"];
+let curAudio=null;
+function stopSay(){try{speechSynthesis.cancel()}catch(e){}if(curAudio){try{curAudio.pause()}catch(e){}curAudio=null}const w=document.querySelector(".voice");if(w)w.classList.remove("on")}
 /* vitesse adaptée pour viser 30 à 45 secondes (≈ 2,6 mots/s à vitesse normale) */
 const sayRate=s=>Math.min(1.05,Math.max(0.92,sayText(s).split(/\s+/).length/(2.6*55)));
 function voiceBox(s){
-  if(!("speechSynthesis" in window))return "";
-  const words=sayText(s).split(/\s+/).length, sec=Math.round(words/(2.6*sayRate(s)));
+  const words=sayText(s).split(/\s+/).length, sec=Math.round(words/2.4/5)*5;
   return `<div class="voice" id="voice"><div class="face" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5z"/></svg></div>
-   <div class="vt"><b>Écouter la fiche</b><span>Une voix calme vous explique la fiche (environ ${sec} secondes)</span><div class="vbar"><i id="vbar"></i></div></div>
+   <div class="vt"><b>Écouter la fiche</b><span id="vinfo">Une voix calme vous explique la fiche (environ ${sec} secondes)</span><div class="vbar"><i id="vbar"></i></div></div>
    <button type="button" id="vplay" class="lg niv" aria-pressed="false">▶ Écouter</button></div>`;
+}
+function voiceUI(on){
+  const bx=$("voice"),bb=$("vplay"); if(bx)bx.classList.toggle("on",on);
+  if(bb){bb.textContent=on?"■ Arrêter":"▶ Écouter";bb.setAttribute("aria-pressed",String(on))}
+}
+function speakDevice(s){
+  try{
+    speechSynthesis.cancel(); const txt=sayText(s), u=new SpeechSynthesisUtterance(txt);
+    u.lang="fr-FR"; if(sayVoice)u.voice=sayVoice; u.rate=sayRate(s); u.pitch=0.95;
+    u.onboundary=e=>{const bar=$("vbar");if(bar)bar.style.width=Math.min(100,100*e.charIndex/txt.length)+"%"};
+    u.onend=u.onerror=()=>{voiceUI(false);const bar=$("vbar");if(bar)bar.style.width="100%"};
+    voiceUI(true); speechSynthesis.speak(u);
+  }catch(e){const i=$("vinfo");if(i)i.textContent="La lecture audio n'est pas disponible sur cet appareil.";voiceUI(false)}
+}
+function playFile(s,srcs,k){
+  if(k>=srcs.length){("speechSynthesis" in window)?speakDevice(s):voiceUI(false);return}
+  const a=new Audio(); curAudio=a; a.preload="auto";
+  a.ontimeupdate=()=>{const bar=$("vbar");if(bar&&a.duration)bar.style.width=(100*a.currentTime/a.duration)+"%"};
+  a.onended=()=>{voiceUI(false);curAudio=null};
+  a.onerror=()=>{if(curAudio===a){curAudio=null;playFile(s,srcs,k+1)}};
+  a.src=srcs[k]; voiceUI(true);
+  const pr=a.play(); if(pr&&pr.catch)pr.catch(err=>{if(curAudio===a&&err&&err.name!=="AbortError"&&err.name!=="NotAllowedError"){curAudio=null;playFile(s,srcs,k+1)}else if(err&&err.name==="NotAllowedError")voiceUI(false)});
 }
 function wireVoice(s){
   const b=$("vplay"); if(!b)return;
   b.onclick=()=>{
-    const box=$("voice");
-    if(box.classList.contains("on")){stopSay();b.textContent="▶ Écouter";b.setAttribute("aria-pressed","false");return}
-    try{
-      speechSynthesis.cancel(); const txt=sayText(s), u=new SpeechSynthesisUtterance(txt);
-      u.lang="fr-FR"; if(sayVoice)u.voice=sayVoice; u.rate=sayRate(s); u.pitch=0.95;
-      u.onboundary=e=>{const bar=$("vbar");if(bar)bar.style.width=Math.min(100,100*e.charIndex/txt.length)+"%"};
-      u.onend=u.onerror=()=>{const bx=$("voice");if(bx)bx.classList.remove("on");const bb=$("vplay");if(bb){bb.textContent="▶ Écouter";bb.setAttribute("aria-pressed","false")}const bar=$("vbar");if(bar)bar.style.width="100%"};
-      box.classList.add("on"); b.textContent="■ Arrêter"; b.setAttribute("aria-pressed","true"); speechSynthesis.speak(u);
-    }catch(e){box.querySelector("span").textContent="La lecture audio n'est pas disponible sur cet appareil."}
+    if($("voice").classList.contains("on")){stopSay();voiceUI(false);return}
+    stopSay(); playFile(s,AUDIO_SRC(slugSci(s.sci)),0);
   };
 }
 let curSp=null;

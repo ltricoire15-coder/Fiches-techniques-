@@ -36,3 +36,11 @@ directement sur GitHub (branche `main`) : chaque push met le lien à jour.
   Safari plante (« Unexpected EOF »). Ne jamais le remettre en `<script>` classique.
 - Le cadre `#diag` affiche l'erreur à l'écran si le programme ne démarre pas.
 - Photos : `PHOTOS` associe le nom latin (slug) à [adresse de l'image, page Wikipédia].
+
+## Audio des fiches
+
+- Bouton « Écouter » : joue `audio/<nom-latin-en-slug>.mp3` (voix OpenAI `tts-1-hd`, voix « nova », choisie par
+  l'utilisateur), via jsDelivr puis raw.githubusercontent ; sinon voix de synthèse de l'appareil.
+- Le texte lu vient de `sayText()` dans `index.html` (explication rédigée, sans accessoires ni paramètres).
+- Après tout ajout ou changement de fiche : lancer `python3 -I tools/gen_audio.py` (ne régénère que les textes
+  modifiés, d'après `audio/index.json`), puis commit + push des MP3. La clé OpenAI est injectée par le proxy.
