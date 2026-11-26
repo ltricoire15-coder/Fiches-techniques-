@@ -87,6 +87,21 @@ dd .sci{font-style:italic;font-size:1.05rem}
 .voice .vbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
 @media (max-width:640px){.voice{padding:12px 16px}}
 @media (prefers-reduced-motion:reduce){.voice.on .face::after{animation:none}}
+.quiz{padding:14px 24px;border-bottom:1px solid var(--line)}
+.quiz .qhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.quiz .qhead b{font-size:.95rem}.quiz .qhead span{display:block;font-size:.82rem;color:var(--muted)}
+.quiz .qnum{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:12px 0 4px;font-variant-numeric:tabular-nums}
+.quiz .qq{font-family:var(--f-display);font-size:1.15rem;margin:0 0 10px;text-wrap:balance}
+.quiz .opts{display:grid;gap:8px}
+.quiz .opt{text-align:left;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;line-height:1.35}
+.quiz .opt:hover:not(:disabled){border-color:var(--accent)}
+.quiz .opt.good{border-color:var(--dom);background:var(--dom-bg);color:var(--dom);font-weight:600}
+.quiz .opt.bad{border-color:var(--nd);background:var(--nd-bg);color:var(--nd)}
+.quiz .opt:disabled{cursor:default}
+.quiz .qfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.quiz .qmsg{font-weight:600}
+.quiz .qscore{font-family:var(--f-display);font-size:2rem;margin:8px 0 2px;font-variant-numeric:tabular-nums}
+@media (max-width:640px){.quiz{padding:12px 16px}}
 .pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px}
 .pager a{text-decoration:none;color:var(--accent);font-weight:500;font-size:.9rem;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
 .pager a:hover{border-color:var(--accent)}
@@ -480,6 +495,66 @@ function wireVoice(s){
     stopSay(); playFile(s,AUDIO_SRC(slugSci(s.sci)),0);
   };
 }
+/* Jeu : quiz à choix multiples (6 questions) construit à partir de la fiche ; mauvaises réponses prises dans les autres fiches */
+const QZ=[
+ ["sci","Quel est son nom scientifique (genre et espèce) ?",x=>x.replace(/\s*\(.*\)/,"")],
+ ["st","Quel est son statut juridique ?",x=>x],
+ ["ord","À quel ordre appartient-il ?",x=>x],
+ ["fam","À quelle famille appartient-il ?",x=>x.replace(/\s*\(.*\)/,"")],
+ ["ori","D'où est-il originaire ?",x=>x],
+ ["bio","Quel est son biotope ?",x=>x],
+ ["reg","Quel est son régime alimentaire ?",x=>x],
+ ["rep","Quel est son mode de reproduction ?",x=>x],
+ ["vie","Quelle est sa durée de vie ?",x=>x],
+ ["tai","Quelle est sa taille adulte ?",x=>x]
+];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function makeQuiz(s){
+  const out=[];
+  for(const [k,q,f] of shuffle(QZ)){
+    if(!s[k]||s[k]===SAY_SKIP)continue;
+    const good=f(s[k]);
+    let pool=k==="st"?[D,N]:k==="rep"?["Ovipare","Vivipare","Ovovivipare"]:null;
+    if(!pool){
+      const same=S.filter(x=>x!==s&&x.g===s.g), other=S.filter(x=>x!==s&&x.g!==s.g);
+      pool=[...shuffle(same),...shuffle(other)].map(x=>x[k]).filter(v=>v&&v!==SAY_SKIP).map(f);
+    }
+    const wrong=[...new Set(pool.filter(v=>v.toLowerCase()!==good.toLowerCase()))].slice(0,3);
+    if(wrong.length<1)continue;
+    out.push({q,good,opts:shuffle([good,...wrong])});
+    if(out.length===6)break;
+  }
+  return out;
+}
+function quizBox(){
+  return `<div class="quiz" id="quiz"><div class="qhead"><div><b>Jeu : quiz de révision</b><span>6 questions à choix multiples sur cette fiche</span></div>
+   <button type="button" id="qstart" class="lg niv">Jouer</button></div><div id="qzone"></div></div>`;
+}
+function wireQuiz(s){
+  const st=$("qstart"); if(!st)return;
+  let Q=[],i=0,score=0;
+  const show=()=>{
+    const z=$("qzone"); if(!z)return;
+    if(i>=Q.length){
+      const msg=score===Q.length?"Parfait, vous connaissez cette fiche par cœur !":score>=Q.length*0.6?"Bien joué ! Relisez les réponses manquées.":"Relisez la fiche puis rejouez.";
+      z.innerHTML=`<div class="qscore">${score} / ${Q.length}</div><p class="qmsg">${msg}</p><div class="qfoot"><span></span><button type="button" class="lg niv" id="qagain">Rejouer</button></div>`;
+      $("qagain").onclick=start; return;
+    }
+    const c=Q[i];
+    z.innerHTML=`<p class="qnum">Question ${i+1} / ${Q.length} · Score : ${score}</p><p class="qq">${esc(c.q)}</p>
+     <div class="opts">${c.opts.map((o,j)=>`<button type="button" class="opt" data-j="${j}">${esc(o)}</button>`).join("")}</div>
+     <div class="qfoot"><span class="qmsg" id="qmsg" aria-live="polite"></span><button type="button" class="lg niv" id="qnext" hidden>${i+1<Q.length?"Question suivante":"Voir le score"}</button></div>`;
+    z.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      const ok=c.opts[+b.dataset.j]===c.good; if(ok)score++;
+      z.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(c.opts[+x.dataset.j]===c.good)x.classList.add("good")});
+      if(!ok)b.classList.add("bad");
+      $("qmsg").textContent=ok?"Bonne réponse !":"Raté, la bonne réponse est en vert.";
+      const n=$("qnext");n.hidden=false;n.focus();n.onclick=()=>{i++;show()};
+    });
+  };
+  function start(){Q=makeQuiz(s);i=0;score=0;st.textContent="Recommencer";show()}
+  st.onclick=start;
+}
 let curSp=null;
 function viewSp(s){
   const G=GROUPS[s.g],list=s.f.sp,i=list.indexOf(s),prev=list[i-1],next=list[i+1];
@@ -488,12 +563,13 @@ function viewSp(s){
    `<article class="fiche${rev?" rev":""}" style="--cc:var(${G.color})"><div class="fhead"><div><p class="level">Fiche technique</p><h1>${esc(s.n)}</h1><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${(s.niv?[].concat(s.niv):["N"]).map(k=>`<span class="badge ok">${TABS[k]}</span>`).join("")}</div></div>
    ${tab==="E"&&evalNiv?`<div class="ftools"><button type="button" id="rand">Fiche au hasard</button></div>`:""}</div>
    ${voiceBox(s)}
+   ${quizBox()}
    <figure class="photo" hidden><img alt="Photo : ${esc(s.n)}"><figcaption>Photo : <a href="#" target="_blank" rel="noopener">Wikipédia</a></figcaption></figure>
    ${rev?`<div class="hint">Mode révision : cliquez sur une réponse floutée pour la dévoiler.</div>`:""}
    <dl>${FIELDS.map(([l,fn],j)=>`<div><dt>${typeof l==="function"?l(s):l}</dt><dd ${rev?'tabindex="0"':""} class="${j===0?"shown":""}"><span class="v">${fn(s)}</span></dd></div>`).join("")}</dl></article>
    <div class="pager">${prev?`<a href="#${prev.id}">← ${esc(prev.n)}</a>`:`<a href="#${s.f.key}">← Retour à la famille</a>`}${next?`<a href="#${next.id}">${esc(next.n)} →</a>`:`<a href="#${s.f.key}">Retour à la famille →</a>`}</div>`;
   if(tab==="E"&&evalNiv){const L=evalList(evalNiv);$("rand").onclick=()=>nav(L[Math.floor(Math.random()*L.length)].id)}
-  stopSay(); curSp=s; wireVoice(s);
+  stopSay(); curSp=s; wireVoice(s); wireQuiz(s);
   const fig=$("view").querySelector(".photo");
   photoFor(s).then(p=>{if(!p||curSp!==s||!fig.isConnected)return;const im=fig.querySelector("img");im.onload=()=>{fig.hidden=false};im.src=p.src;const a=fig.querySelector("a");if(p.page)a.href=p.page;else a.removeAttribute("href")});
   const fi=$("view").querySelector(".fiche");
