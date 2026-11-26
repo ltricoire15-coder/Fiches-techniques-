@@ -45,7 +45,10 @@ directement sur GitHub (branche `main`) : chaque push met le lien à jour.
 - Après tout ajout ou changement de fiche : lancer `python3 -I tools/gen_audio.py` (ne régénère que les textes
   modifiés, d'après `audio/index.json`), puis commit + push des MP3. La clé OpenAI est injectée par le proxy.
 
-## Jeu de révision
+## Jeux de révision
 
-- Chaque fiche a un quiz de 6 questions à choix multiples (`makeQuiz`), généré automatiquement à partir des
-  rubriques ; les mauvaises réponses viennent des autres fiches. Rien à faire quand on ajoute une fiche.
+- Sur chaque fiche : quiz à choix multiples sur toutes les rubriques (`makeQuiz`) et mots croisés (`cwWords`/`buildCw`),
+  générés automatiquement ; rien à faire quand on ajoute une fiche.
+- Onglets Terminale et Première : « Jeu des images » (`#jeu-images`) sur les fiches de l'onglet ayant une photo,
+  3 niveaux : Facile (3 propositions), Intermédiaire (voyelles visibles), Expert (nombre de lettres seulement).
+  Penser à ajouter la photo (`PHOTOS`) de chaque nouvelle fiche.
