@@ -74,6 +74,19 @@ dd .sci{font-style:italic;font-size:1.05rem}
 .rev dd .v{filter:blur(6px);cursor:pointer;user-select:none;transition:filter .15s}
 .rev dd.shown .v{filter:none;user-select:auto}
 .hint{font-size:.85rem;color:var(--muted);padding:10px 24px;background:var(--accent-soft)}
+.voice{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--accent-soft)}
+.voice .face{width:46px;height:46px;border-radius:50%;background:var(--accent);color:var(--surface);display:grid;place-items:center;flex:none;position:relative}
+.voice .face svg{width:26px;height:26px}
+.voice.on .face::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--accent);animation:talk 1s ease-out infinite}
+@keyframes talk{from{opacity:.9;transform:scale(.9)}to{opacity:0;transform:scale(1.3)}}
+.voice .vt{flex:1;min-width:160px}
+.voice .vt b{display:block;font-size:.95rem}
+.voice .vt span{font-size:.82rem;color:var(--muted)}
+.voice button{font-weight:600}
+.voice .vbar{height:4px;border-radius:2px;background:var(--line);margin-top:6px;overflow:hidden}
+.voice .vbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+@media (max-width:640px){.voice{padding:12px 16px}}
+@media (prefers-reduced-motion:reduce){.voice.on .face::after{animation:none}}
 .pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px}
 .pager a{text-decoration:none;color:var(--accent);font-weight:500;font-size:.9rem;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
 .pager a:hover{border-color:var(--accent)}
@@ -369,6 +382,53 @@ async function photoFor(s){
   }
   return PH[s.id]=null;
 }
+/* Lecture audio : texte construit depuis la fiche, lu par la voix de synthèse française de l'appareil */
+const SAY_SKIP="Non renseigné sur la fiche";
+function sayFix(x){
+  return String(x).replace(/\s*\([A-Z][a-z]+idae\)/g,"").replace(/ · /g,", ").replace(/(\d),(\d)/g,"$1 virgule $2")
+   .replace(/(\d)\s*–\s*(\d)/g,"$1 à $2").replace(/ – /g," à ").replace(/°dGH/g," degrés").replace(/\bGH\b/g,"dureté")
+   .replace(/°C/g," degrés").replace(/\bpH\b/g,"pé ache").replace(/(\d)\s*%/g,"$1 pour cent").replace(/(\d)\s*cm\b/g,"$1 centimètres")
+   .replace(/(\d)\s*kg\b/g,"$1 kilos").replace(/(\d)\s*m\b/g,"$1 mètres").replace(/(\d)\s*L\b/g,"$1 litres").replace(/ ; /g,", ").replace(/≈|~/g,"environ ");
+}
+function sayText(s){
+  const v=(k,pre,post="")=>s[k]&&s[k]!==SAY_SKIP?pre+sayFix(s[k])+post:"";
+  return [`Fiche technique : ${s.n}.`,`Son nom scientifique est ${s.sci.replace(/\s*\(.*\)/,"")}.`,
+   `C'est une espèce ${s.st===D?"domestique":"non domestique"}.`,
+   `Classe des ${s.cla.replace(/\s*\(.*\)/,"")}, ordre des ${sayFix(s.ord)}, famille des ${sayFix(s.fam)}.`,
+   v("ori","Origine : ","."),v("bio","Biotope : ","."),v("reg","Régime alimentaire : ","."),v("rep","Reproduction : ","."),
+   v("dim","Dimorphisme sexuel : "," "),v("comp","Comportement : ","."),v("acc","Accessoires : ","."),
+   v("par",(s.pl||"Paramètres")+" : ","."),v("vie","Durée de vie : ","."),v("tai","Taille adulte : ",".")].filter(Boolean).join(" ").replace(/\.\s*\./g,".");
+}
+let sayVoice=null;
+function pickVoice(){
+  try{const vs=speechSynthesis.getVoices().filter(x=>/^fr/i.test(x.lang));
+    sayVoice=vs.find(x=>/Amélie|Amelie|Audrey|Thomas|Google français|Denise|Henri/i.test(x.name))||vs.find(x=>/fr-FR/i.test(x.lang))||vs[0]||null}catch(e){}
+}
+try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
+function stopSay(){try{speechSynthesis.cancel()}catch(e){}const w=document.querySelector(".voice");if(w)w.classList.remove("on")}
+/* vitesse adaptée pour viser 30 à 45 secondes (≈ 2,6 mots/s à vitesse normale) */
+const sayRate=s=>Math.min(1.35,Math.max(1,sayText(s).split(/\s+/).length/(2.6*43)));
+function voiceBox(s){
+  if(!("speechSynthesis" in window))return "";
+  const words=sayText(s).split(/\s+/).length, sec=Math.round(words/(2.6*sayRate(s)));
+  return `<div class="voice" id="voice"><div class="face" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5z"/></svg></div>
+   <div class="vt"><b>Écouter la fiche</b><span>Une voix lit et résume la fiche (environ ${sec} secondes)</span><div class="vbar"><i id="vbar"></i></div></div>
+   <button type="button" id="vplay" class="lg niv" aria-pressed="false">▶ Écouter</button></div>`;
+}
+function wireVoice(s){
+  const b=$("vplay"); if(!b)return;
+  b.onclick=()=>{
+    const box=$("voice");
+    if(box.classList.contains("on")){stopSay();b.textContent="▶ Écouter";b.setAttribute("aria-pressed","false");return}
+    try{
+      speechSynthesis.cancel(); const txt=sayText(s), u=new SpeechSynthesisUtterance(txt);
+      u.lang="fr-FR"; if(sayVoice)u.voice=sayVoice; u.rate=sayRate(s);
+      u.onboundary=e=>{const bar=$("vbar");if(bar)bar.style.width=Math.min(100,100*e.charIndex/txt.length)+"%"};
+      u.onend=u.onerror=()=>{const bx=$("voice");if(bx)bx.classList.remove("on");const bb=$("vplay");if(bb){bb.textContent="▶ Écouter";bb.setAttribute("aria-pressed","false")}const bar=$("vbar");if(bar)bar.style.width="100%"};
+      box.classList.add("on"); b.textContent="■ Arrêter"; b.setAttribute("aria-pressed","true"); speechSynthesis.speak(u);
+    }catch(e){box.querySelector("span").textContent="La lecture audio n'est pas disponible sur cet appareil."}
+  };
+}
 let curSp=null;
 function viewSp(s){
   const G=GROUPS[s.g],list=s.f.sp,i=list.indexOf(s),prev=list[i-1],next=list[i+1];
@@ -376,12 +436,13 @@ function viewSp(s){
   $("view").innerHTML=(ev?crumbs([[TABS[evalNiv],"eval-"+evalNiv],[s.n]]):crumbs([[G.name,s.g],[s.ord,s.o.key],[s.fam,s.f.key],[s.n]]))+
    `<article class="fiche${rev?" rev":""}" style="--cc:var(${G.color})"><div class="fhead"><div><p class="level">Fiche technique</p><h1>${esc(s.n)}</h1><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${(s.niv?[].concat(s.niv):["N"]).map(k=>`<span class="badge ok">${TABS[k]}</span>`).join("")}</div></div>
    ${tab==="E"&&evalNiv?`<div class="ftools"><button type="button" id="rand">Fiche au hasard</button></div>`:""}</div>
+   ${voiceBox(s)}
    <figure class="photo" hidden><img alt="Photo : ${esc(s.n)}"><figcaption>Photo : <a href="#" target="_blank" rel="noopener">Wikipédia</a></figcaption></figure>
    ${rev?`<div class="hint">Mode révision : cliquez sur une réponse floutée pour la dévoiler.</div>`:""}
    <dl>${FIELDS.map(([l,fn],j)=>`<div><dt>${typeof l==="function"?l(s):l}</dt><dd ${rev?'tabindex="0"':""} class="${j===0?"shown":""}"><span class="v">${fn(s)}</span></dd></div>`).join("")}</dl></article>
    <div class="pager">${prev?`<a href="#${prev.id}">← ${esc(prev.n)}</a>`:`<a href="#${s.f.key}">← Retour à la famille</a>`}${next?`<a href="#${next.id}">${esc(next.n)} →</a>`:`<a href="#${s.f.key}">Retour à la famille →</a>`}</div>`;
   if(tab==="E"&&evalNiv){const L=evalList(evalNiv);$("rand").onclick=()=>nav(L[Math.floor(Math.random()*L.length)].id)}
-  curSp=s;
+  stopSay(); curSp=s; wireVoice(s);
   const fig=$("view").querySelector(".photo");
   photoFor(s).then(p=>{if(!p||curSp!==s||!fig.isConnected)return;const im=fig.querySelector("img");im.onload=()=>{fig.hidden=false};im.src=p.src;const a=fig.querySelector("a");if(p.page)a.href=p.page;else a.removeAttribute("href")});
   const fi=$("view").querySelector(".fiche");
@@ -397,6 +458,7 @@ function viewList(ok){
   $("view").innerHTML=crumbs([[t]])+`<div class="hero"><div style="margin-bottom:8px">${badge({ok})}</div><h1>${t}</h1><p class="lead">${plural(L.length,"fiche","fiches")}. ${ok?"Ces fiches ont été vérifiées avec le cours.":"Ces fiches ont été rédigées automatiquement : à vérifier avec le cours."} <a href="#${ok?"a-verifier":"verifiees"}">Voir les fiches ${ok?"à vérifier":"vérifiées"}</a></p></div>`+body;
 }
 function route(){
+  stopSay();
   const h=curH;
   let m;
   const sp=S.find(s=>s.id===h);
