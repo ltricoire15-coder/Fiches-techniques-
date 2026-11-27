@@ -745,7 +745,7 @@ function viewList(ok){
   $("view").innerHTML=crumbs([[t]])+`<div class="hero"><div style="margin-bottom:8px">${badge({ok})}</div><h1>${t}</h1><p class="lead">${plural(L.length,"fiche","fiches")}. ${ok?"Ces fiches ont été vérifiées avec le cours.":"Ces fiches ont été rédigées automatiquement : à vérifier avec le cours."} <a href="#${ok?"a-verifier":"verifiees"}">Voir les fiches ${ok?"à vérifier":"vérifiées"}</a></p></div>`+body;
 }
 function route(){
-  stopSay();
+  stopSay(); $("view").classList.remove("playmode");
   const h=curH;
   let m;
   const sp=S.find(s=>s.id===h);
